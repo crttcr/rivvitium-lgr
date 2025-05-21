@@ -5,7 +5,7 @@ An easy to use, high performance data pipeline with format flexibility written i
 ## About
 
 Rivvitium is both a library and a tool.  The libray exists to abstract away source and destination formatting details
-and to provide an intermediate data representation that enables analysis, validation, and statistics.
+and to provide an **intermediate data representation** that enables analysis, validation, and statistics.
 The tool exists to make using the library functions easy to access. Fire up the executable and you can be
 handling data files immediately.
 
