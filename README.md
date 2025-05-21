@@ -38,7 +38,7 @@ rivvitium [input]
 ```
 Once running, the choices should be self explanatory:
 
-1. `ingest`   - click on the drop file button to select an input data file
-2. `analyze`  - perform analysis on the file's contents
+1. `ingest`   - click on the *Ingest file* file button or drop a file in the dropzone to select an input file
+2. `analyze`  - optionally perform analysis on the file's contents
 3. `publish`  - choose the type of destination and configure appropriate settings
 
