@@ -13,7 +13,7 @@ Start with **Benchmarking** and **Memmory Usage**
 ### Benchmarking with Criterion
 
 1: Add the Criterion dependency
-```toml
+#### **`Cargo.toml`**
 // Cargo.toml
 [dev-dependencies]
 criterion = "0.4"
@@ -27,6 +27,7 @@ mkdir benches
 
 3: Write a benchmark
 
+#### **`bench_throughput.rs`**
 ```rust
 use criterion::{criterion_group, criterion_main, Criterion};
 use your_crate::process;        // your library entrypoint
@@ -45,9 +46,9 @@ criterion_group!(benches, bench_throughput);
 criterion_main!(benches);
 ```
 
-4. Run with `cargo bench`
+4. Run with the benchmark
 ```bash
-cargo bench
+$ cargo bench
 ```
 
 ### Monitoring memory
