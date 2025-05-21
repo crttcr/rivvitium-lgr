@@ -14,7 +14,7 @@ Start with **Benchmarking** and **Memmory Usage**
 
 1: Add the Criterion dependency
 #### **`Cargo.toml`**
-// Cargo.toml
+```toml
 [dev-dependencies]
 criterion = "0.4"
 ```
