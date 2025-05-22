@@ -1,4 +1,17 @@
+## Workspace structure
 
+### Objective
+
+Create a workspace that is comprised of multiple crates to keep the codebase organized
+The initial work targets creating a library of data processing resources that permit
+reading and writing structured data files. Given Rivvitium's multi-format nature, reading
+and writing should be independent crates so that additions can be isolated in crate versions.
+
+### Straw man directory structure 
+This will definitely change but serves as a starting point for discussion and consderation.
+
+
+```
 .
 ├── Cargo.toml          # Workspace root (virtual manifest)
 ├── .env                # Environment variables
@@ -34,4 +47,4 @@
 │
 └── tests/              # End-to-end integration tests
     └── integration_tests.rs
-
+```
