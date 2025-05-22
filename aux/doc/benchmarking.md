@@ -4,11 +4,11 @@
 ## High-level plan
 
 - Benchmarking with Criterion for throughput/latency.
-- DHAT or jemalloc_ctl for memory footprints.
-- CI guardrails to detect performance drifts.
 - Flamegraphs for deeper profiling.
+- CI guardrails to detect performance drifts (eventually)
 
-Start with **Benchmarking** and **Memmory Usage** 
+Start with building basic **Benchmarking** functions
+into the code base.
 
 ### Benchmarking with Criterion
 
@@ -49,8 +49,3 @@ criterion_main!(benches);
 ```bash
 $ cargo bench
 ```
-
-### Monitoring memory
-
-**TBD**
-
