@@ -33,12 +33,11 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use your_crate::process;        // your library entrypoint
 use your_crate::test_utils;     // helper to generate data
 
-fn bench_throughput(c: &mut Criterion) {
-    // prepare a large test file in memory
-    let data = test_utils::generate_csv_rows(10_000);
-    // measure how many rows/sec your `process` can handle
-    c.bench_function("process 10k rows", |b| {
-        b.iter(|| proc:ess(&data))
+fn bench_throughput(c: &mut Criterion) 
+{
+    let data = test_utils::generate_csv_rows(10_000);       // prepare a large test file in memory
+    c.bench_function("process 10k rows", |b| {              // measure how many rows/sec your `process` can handle
+        b.iter(|| process(&data))
     });
 }
 
