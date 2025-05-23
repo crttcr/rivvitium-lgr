@@ -1,0 +1,11 @@
+
+[workspace]
+members = [
+    "cli",
+    "gui",
+    "riv",
+    "zed",
+]
+
+resolver = "3"
+

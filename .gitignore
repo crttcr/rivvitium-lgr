@@ -1,0 +1,15 @@
+/target
+/.idea
+/out
+
+## Environment files
+.env
+.env-dev
+.env-prod
+.env-stage
+.env-test
+**/.env
+
+# OS Files
+.DS_Store
+
