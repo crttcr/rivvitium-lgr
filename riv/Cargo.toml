@@ -5,3 +5,12 @@ edition    = "2024"
 
 [dependencies]
 zed         = {path = "../zed"}
+
+[dev-dependencies]
+criterion     = {version = "0.5", features = ["html_reports"]}
+
+[[bench]]
+name    = "riv_one"    # Name of your benchmark file 
+harness = false        # Disable Cargo's benchmark harness
+
+
