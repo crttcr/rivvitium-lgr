@@ -4,29 +4,28 @@ An easy to use, high performance data pipeline with format flexibility written i
 
 ## About
 
-Rivvitium is both a library and a tool.  The libray exists to abstract away source and destination formatting details
-and to provide an **intermediate data representation** that enables analysis, validation, and statistics.
-The tool exists to make using the library functions easy to access. Fire up the executable and you can be
-handling data files immediately.
+Rivvitium is both a library and a tool.  The libray exists to abstract away source and destination format detail and to provide an 
+**intermediate data representation** enabling analysis, validation, and statistics.
+The tool exists to make using the library functions easy to access.
+Fire up the executable and you can be handling data files immediately
+without getting bogged down in parsing arcana.
 
 <!---
-your comment goes here
-and here
+This is how you can use comments in markdown.
 
 ### Installation
 
-This is published to [crates.io](https://crates.io/crates/jsrmx) so you can simply do a global install with:
+This is a link [crates.io](https://crates.io/crates/jsrmx) blah blah
 
-```sh
+```bash
 cargo install jsrmx
 ```
 
 Then `jsrmx` is executable from your shell
 
-```sh
+```bash
 jsrmx --help
 ```
-
 -->
 
 ## Usage
@@ -38,7 +37,10 @@ rivvitium [input]
 ```
 Once running, the choices should be self explanatory:
 
-1. `ingest`   - click on the *Ingest file* file button or drop a file in the dropzone to select an input file
+1. `ingest`   - click the *Ingest file* button or drop a file in the dropzone to select an input file
 2. `analyze`  - optionally perform analysis on the file's contents
-3. `publish`  - click *Publish* and choose a destination type the configure appropriate settings
+3. `publish`  - 
+	* click *Publish*, 
+	* choose a destination type, then
+	* configure appropriate settings to land your data
 
