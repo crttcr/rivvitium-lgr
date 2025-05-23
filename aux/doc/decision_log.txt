@@ -1,0 +1,29 @@
+
+[2025-05-23]
+SQLite:
+	Use [sqlx] to interact with Sqlite
+	Consider [rusqlite] if performance or obscure features are needed
+
+Familiar with Sqlx from previous experience and within the LGR workshop.
+The big downside for Sqlx is lack of support for SQL Server (which is a
+huge limitation for us [tiberius] or [odbc-api] might be capable)
+
+Side Note: It's hard to consider Rust a mature language if there's no
+first class solution for working with Sql Server. This exact issue is
+why our backend is 100% Scala and 0% Rust.
+
+[2025-05-23]
+CSV Parser:
+	Start with the [csv] crate by BurntSushi
+	Consider [csv_lib] crate by PTechSoftware to increase performance
+
+It will also be instructive to allow for multiple underlying CSV parsers
+to enhance the flexibility of the approach.
+
+[2025-05-23]
+JSON Parser:
+	Use the [serde_json] standard
+	[json-rust]/[simd-json] are alternatives
+
+serde_json is by far the most standard way to handle Json and it has the largest ecosystem.
+Will need a complelling reason to start investigating another solution.
