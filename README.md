@@ -39,8 +39,8 @@ Once running, the choices should be self explanatory:
 
 1. `ingest`   - click the *Ingest file* button or drop a file in the dropzone to select an input file
 2. `analyze`  - optionally perform analysis on the file's contents
-3. `publish`  - 
+3. `publish`  - land your data
 	* click *Publish*, 
 	* choose a destination type, then
-	* configure appropriate settings to land your data
+	* configure appropriate settings
 
