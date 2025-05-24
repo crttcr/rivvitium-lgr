@@ -15,14 +15,14 @@ impl ConsoleSink {
 
 impl Sink<u64> for ConsoleSink
 {
-	fn initialze<C: Display>(&mut self, cfg: &C) -> Result<(), Error> {
+	fn initialize<C: Display>(&mut self, cfg: &C) -> Result<(), Error> {
 		println!("--- ConsoleSink initialized ---");
 		println!("{cfg}");
 		self.count = 0;
 		Ok(())
 	}
 
-	fn accept(&mut self, atom: &Atom) -> Result<(), Error> {
+	fn accept(&mut self, atom: Atom) -> Result<(), Error> {
 		println!("{atom:?}");
 		self.count += 1;
 		Ok(())
