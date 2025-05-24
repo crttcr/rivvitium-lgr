@@ -4,6 +4,7 @@ version    = "0.1.0"
 edition    = "2024"
 
 [dependencies]
-riv =    {path = "../riv"}
-zed =    {path = "../zed"}
+anyhow      = "1.0"
+riv         = {path = "../riv"}
+zed         = {path = "../zed"}
 
