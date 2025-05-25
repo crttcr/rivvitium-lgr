@@ -1,3 +1,4 @@
+use crate::Error;
 use crate::model::ir::atom_type::AtomType;
 
 
@@ -6,6 +7,8 @@ pub enum Atom
 {
 	// Control
 	Start,
+	Finish,
+	ErrorAtom(Error),
 	
 	// Data
 	Values(u8),
@@ -19,14 +22,25 @@ impl Atom {
 	fn atom_type(&self) -> AtomType {
 		match self 
 		{
-			Atom::Start     => AtomType::Control,
-			Atom::Values(_) => AtomType::Data,
+			Atom::Start          => AtomType::Control,
+			Atom::Finish         => AtomType::Control,
+			Atom::ErrorAtom(_)   => AtomType::Control,
+			Atom::Values(_)      => AtomType::Data,
 		}
 	}
 }
 
 
 /*
+// TODO: InternalMetadata
+// Header
+// Section
+//   Binding(n = v)
+//   Binding
+// Trailer
+//
+// Example below:
+//
 View trades
 TRADE PARAMETERS : 
 Trade Start Date = 31-JAN-2025

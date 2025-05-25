@@ -35,7 +35,8 @@ fn run() -> Result<(), Error>
 
     let relay_ok = relay.finish();
     if relay_ok {
-        let count = sink.finalize()?;
+        let out   = sink.finalize()?;
+        let count = out.len();
         println!("Processed {count} atoms");
         Ok(())
     } else {

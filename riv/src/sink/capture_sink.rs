@@ -20,10 +20,10 @@ impl CaptureSink {
 	}
 }
 
-impl Sink<u64> for CaptureSink {
+impl Sink<Vec<Atom>> for CaptureSink {
 	fn initialize<C: Display>(&mut self, cfg: &C) -> Result<(), Error> {
-		println!("--- CaptureSink initialized ---");
-		println!("{cfg}");
+		let msg = format!("[CaptureSink ]: initialized with config: {}", cfg);
+		println!("{msg}");
 		self.atoms.clear();
 		Ok(())
 	}
@@ -33,7 +33,8 @@ impl Sink<u64> for CaptureSink {
 		Ok(())
 	}
 
-	fn finalize(&mut self) -> Result<u64, Error> {
-		Ok(self.atoms.len() as u64)
+	fn finalize(&mut self) -> Result<Vec<Atom>, Error> {
+		let rv: Vec<Atom> = self.atoms.drain(..).collect();
+		Ok(rv)
 	}
 }

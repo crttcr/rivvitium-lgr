@@ -10,6 +10,12 @@ fn fibonacci(n: u64) -> u64 {
     }
 }
 
+/*/*/*/*/*/*/*/*
+fn run_pipeline_test() {
+    test_capture_of_start_and_end();
+}
+*/
+
 // A benchmark function
 // You can group benchmarks for better organization in reports
 // "fib 30" is another benchmark in the same group
@@ -41,4 +47,3 @@ criterion_group!(benches, bench_fibonacci, bench_another_function);
 // This macro generates the main function for your benchmarks
 //
 criterion_main!(benches);
-
