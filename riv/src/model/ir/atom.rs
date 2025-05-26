@@ -1,5 +1,6 @@
 use crate::Error;
 use crate::model::ir::atom_type::AtomType;
+use crate::model::ir::byte_record::ByteRecord;
 use crate::model::ir::external_metadata::TaskVariant;
 
 
@@ -12,11 +13,11 @@ pub enum Atom
 	ErrorAtom(Error),
 	
 	// Data
-	RawValues(u8),
-	NamedValues(u8),
+	RawValues(ByteRecord),
+	NamedValues(u8),        // TODO: Figure out how I want to model this ...
 	
 	// Metadata
-	HeaderRow(Vec<String>),
+	HeaderRow(ByteRecord),
 //	Metadata(Metadata),
 	
 }
