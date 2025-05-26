@@ -13,6 +13,10 @@ pub struct TestFile {
 	inner: NamedTempFile,
 }
 
+/// TestFile lets one create a temporary file with specified content for testing.
+/// It automatically removes the file when the object goes out of scope.
+/// 
+/// 
 impl TestFile {
 	/// Create a new temp file containing `content`.
 	pub fn with_content(content: &str) -> io::Result<Self> {

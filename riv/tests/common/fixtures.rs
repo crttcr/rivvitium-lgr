@@ -18,7 +18,7 @@ impl TestAtoms {
 	
 	pub fn start_end_vec() -> Vec<Atom> { 
 		let a = Self::create_start_file_atom();
-		let b = Atom::Finish;
+		let b = Atom::FinishTask;
 		vec![a,b]}
 }
 

@@ -8,7 +8,7 @@ pub enum Atom
 {
 	// Control
 	StartTask(TaskVariant),
-	Finish,
+	FinishTask,
 	ErrorAtom(Error),
 	
 	// Data
@@ -24,7 +24,7 @@ impl Atom {
 		match self 
 		{
 			Atom::StartTask(_)   => AtomType::Control,
-			Atom::Finish         => AtomType::Control,
+			Atom::FinishTask     => AtomType::Control,
 			Atom::ErrorAtom(_)   => AtomType::Control,
 			Atom::Values(_)      => AtomType::Data,
 		}
