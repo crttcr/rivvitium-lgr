@@ -12,9 +12,11 @@ pub enum Atom
 	ErrorAtom(Error),
 	
 	// Data
-	Values(u8),
+	RawValues(u8),
+	NamedValues(u8),
 	
 	// Metadata
+	HeaderRow(Vec<String>),
 //	Metadata(Metadata),
 	
 }
@@ -23,10 +25,12 @@ impl Atom {
 	fn atom_type(&self) -> AtomType {
 		match self 
 		{
-			Atom::StartTask(_)   => AtomType::Control,
-			Atom::FinishTask     => AtomType::Control,
-			Atom::ErrorAtom(_)   => AtomType::Control,
-			Atom::Values(_)      => AtomType::Data,
+			Atom::StartTask(_)    => AtomType::Control,
+			Atom::FinishTask       => AtomType::Control,
+			Atom::ErrorAtom(_)     => AtomType::Control,
+			Atom::NamedValues(_)   => AtomType::Data,
+			Atom::RawValues(_)     => AtomType::Data,
+			Atom::HeaderRow(_)     => AtomType::Metadata,
 		}
 	}
 }

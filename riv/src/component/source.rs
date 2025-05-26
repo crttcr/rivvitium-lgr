@@ -10,7 +10,7 @@ use crate::model::ir::atom::Atom;
 use crate::error::Error;
 
 /// Tracks where a producer is in its lifecycle.
-/// 
+///
 #[derive(Debug)]
 pub enum SourceState<S> {
 	Uninitialized,
@@ -30,7 +30,7 @@ pub trait Source: Iterator<Item = Atom> {
 	/// Produces the next atom, or `None` if finished.
 	/// Even when we have an error, we convert it into an Atom
 	/// and send it along.
-	/// 
+	///
 //	fn next(&mut self) -> Option<Atom>;
 
 	/// Called once after production is complete.

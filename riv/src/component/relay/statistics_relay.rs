@@ -3,30 +3,36 @@ use crate::Error;
 use crate::model::ir::atom::Atom;
 use crate::component::relay::Relay;
 
-pub struct ConsoleRelay;
 
-impl ConsoleRelay {
+//
+// FIXME: Implement this class to capture statistics
+//
+
+pub struct StatisticsRelay{
+	total: u64,
+}
+
+impl StatisticsRelay {
 	pub fn new() -> Self {
-		ConsoleRelay
+		StatisticsRelay{ total: 0 }
 	}
 }
 
-impl Relay<()> for ConsoleRelay {
+impl Relay<u64> for StatisticsRelay {
 	fn initialize<C: Display>(&mut self, cfg: &C) -> Result<(), Error> {
-		println!("--- ConsoleRelay initialized ---");
-		println!("{cfg}");
+		println!("--- StatisticsRelay initialized --- {}", cfg);
 		Ok(())
 	}
 
 	fn accept(&mut self, atom: Atom) -> Option<Atom> {
-		println!("{atom:?}");
+		self.total += 1;
 		Some(atom) // pass the atom along unmodified
 	}
 
 	fn finish(&mut self) -> bool {
-		println!("--- ConsoleRelay finished ---");
+		println!("--- StatisticsRelay finished ---");
 		true
 	}
-
-	fn result(&mut self) -> &() { &() }
+	
+	fn result(&mut self) -> &u64 {&self.total}
 }

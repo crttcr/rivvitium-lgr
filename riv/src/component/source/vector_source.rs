@@ -37,8 +37,8 @@ impl Iterator for VectorSource {
 			SourceState::Completed     => None,
 			SourceState::Ready(_)      => {
 				let rv = self.atoms.pop();
-				if rv.is_none() { 
-					self.state = SourceState::Completed 
+				if rv.is_none() {
+					self.state = SourceState::Completed
 				}
 				rv
 			},
