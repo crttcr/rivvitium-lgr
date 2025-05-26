@@ -18,7 +18,7 @@ pub enum Atom
 	
 	// Metadata
 	HeaderRow(ByteRecord),
-//	Metadata(Metadata),
+	//	Metadata(Metadata),     // TODO: Add internal metadata message to support example in comment below
 	
 }
 
@@ -37,6 +37,8 @@ impl Atom {
 }
 
 
+// TODO: This should be modeled as its own concept where it can be tested
+//
 /*
 // TODO: InternalMetadata
 // Header
