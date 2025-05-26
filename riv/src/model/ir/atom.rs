@@ -1,12 +1,13 @@
 use crate::Error;
 use crate::model::ir::atom_type::AtomType;
+use crate::model::ir::external_metadata::ExternalMetadataVariant;
 
 
 #[derive(Debug)]
 pub enum Atom
 {
 	// Control
-	Start,
+	Start(ExternalMetadataVariant),
 	Finish,
 	ErrorAtom(Error),
 	
@@ -22,7 +23,7 @@ impl Atom {
 	fn atom_type(&self) -> AtomType {
 		match self 
 		{
-			Atom::Start          => AtomType::Control,
+			Atom::Start(_)       => AtomType::Control,
 			Atom::Finish         => AtomType::Control,
 			Atom::ErrorAtom(_)   => AtomType::Control,
 			Atom::Values(_)      => AtomType::Data,

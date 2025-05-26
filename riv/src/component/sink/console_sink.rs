@@ -1,5 +1,5 @@
 use std::fmt::Display;
-use crate::sink::Sink;
+use crate::component::sink::Sink;
 use crate::error::Error;
 use crate::model::ir::atom::Atom;
 

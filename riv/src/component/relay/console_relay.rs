@@ -1,7 +1,7 @@
 use std::fmt::Display;
 use crate::Error;
 use crate::model::ir::atom::Atom;
-use crate::relay::Relay;
+use crate::component::relay::Relay;
 
 pub struct ConsoleRelay;
 

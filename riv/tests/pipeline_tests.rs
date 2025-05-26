@@ -1,10 +1,14 @@
+
+mod common;
+
 use riv::Error;
 use riv::model::ir::atom::Atom;
-use riv::sink::capture_sink::CaptureSink;
-use riv::sink::Sink;
-use riv::source::Source;
-use riv::source::vector_source::VectorSource;
-use crate::helpers_arrange::TestAtoms;
+use riv::component::sink::capture_sink::CaptureSink;
+use riv::component::sink::Sink;
+use riv::component::source::Source;
+use riv::component::source::vector_source::VectorSource;
+use common::fixtures::TestAtoms;
+
 
 
 #[test]

@@ -1,9 +1,9 @@
 use anyhow::Result;
 use riv::error::Error;
-use riv::relay::console_relay::ConsoleRelay;
-use riv::relay::Relay;
-use riv::sink::capture_sink::CaptureSink;
-use riv::sink::Sink;
+use riv::component::relay::console_relay::ConsoleRelay;
+use riv::component::relay::Relay;
+use riv::component::sink::capture_sink::CaptureSink;
+use riv::component::sink::Sink;
 
 fn main() 
 {

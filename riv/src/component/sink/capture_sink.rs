@@ -2,7 +2,7 @@
 
 use crate::model::ir::atom::Atom;
 use crate::error::Error;
-use crate::sink::Sink;
+use crate::component::sink::Sink;
 
 use std::fmt::Display;
 

@@ -3,7 +3,7 @@ use std::fmt::Display;
 use crate::model::ir::atom::Atom;
 use crate::error::Error;
 use crate::model::ir::atom::Atom::ErrorAtom;
-use crate::source::{Source, SourceState};
+use crate::component::source::{Source, SourceState};
 
 /// A `Source` that yields atoms from an in-memory Vec.
 pub struct VectorSource {
@@ -26,19 +26,28 @@ impl Iterator for VectorSource {
 
 	fn next(&mut self) -> Option<Self::Item> {
 		match &mut self.state {
-			SourceState::Uninitialized => None,
+			SourceState::Uninitialized => {
+				let msg              = "Source::next() called on uninitialized source. Initialize first.".to_string();
+				let err              = Error::General(msg);
+				self.state           = SourceState::Broken(err.clone());
+				self.error_atom_sent = true;
+				let atom             = ErrorAtom(err.clone());
+				Some(atom)
+			}
 			SourceState::Completed     => None,
 			SourceState::Ready(_)      => {
 				let rv = self.atoms.pop();
-				if rv.is_none() { self.state = SourceState::Completed }
+				if rv.is_none() { 
+					self.state = SourceState::Completed 
+				}
 				rv
 			},
 			SourceState::Broken(err)   => {
 				if self.error_atom_sent { None }
 				else {
 					self.error_atom_sent = true;
-					let x = err.clone();
-					let a = ErrorAtom(x);
+					let x                = err.clone();
+					let a                = ErrorAtom(x);
 					Some(a)
 				}
 			}
