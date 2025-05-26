@@ -1,11 +1,13 @@
 use crate::component::source::vector_source::VectorSource;
 use crate::model::ir::atom::Atom;
-use crate::model::ir::external_metadata::{ExternalMetadataVariant, FileMetadata};
+use crate::model::ir::external_metadata::{TaskVariant, FileMetadata};
+use crate::utils::test_file::TestFile;
 
 #[test]
 fn file_metadata_has_a_valid_ulid() {
-	let f = "/tmp/test_initialize_and_iterate".to_string();
-	let a = FileMetadata::for_file(f, None);
+	let tf = TestFile::with_content("hello, world!").expect("Could not create test file.");
+	let p = tf.path_string();
+	let a = FileMetadata::for_file(p, None).unwrap();
 	let s = a.ulid.to_string();
 	println!("{}", s);
 	println!("{a:?}");

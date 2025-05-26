@@ -1,13 +1,13 @@
 use crate::Error;
 use crate::model::ir::atom_type::AtomType;
-use crate::model::ir::external_metadata::ExternalMetadataVariant;
+use crate::model::ir::external_metadata::TaskVariant;
 
 
 #[derive(Debug)]
 pub enum Atom
 {
 	// Control
-	Start(ExternalMetadataVariant),
+	StartTask(TaskVariant),
 	Finish,
 	ErrorAtom(Error),
 	
@@ -23,7 +23,7 @@ impl Atom {
 	fn atom_type(&self) -> AtomType {
 		match self 
 		{
-			Atom::Start(_)       => AtomType::Control,
+			Atom::StartTask(_)   => AtomType::Control,
 			Atom::Finish         => AtomType::Control,
 			Atom::ErrorAtom(_)   => AtomType::Control,
 			Atom::Values(_)      => AtomType::Data,

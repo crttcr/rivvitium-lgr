@@ -1,3 +1,4 @@
+use std::ffi::OsStr;
 use sha2::{Sha256, Digest};
 use std::fs::File;
 use std::io::{BufReader, Read};
@@ -21,10 +22,17 @@ pub fn sha256_digest_file(file_path: &str) -> Result<String, std::io::Error> {
 	Ok(encoded)
 }
 
-// Assuming this is your function:
 pub fn sha256_digest_string(input: &str) -> String {
 	let mut hasher = Sha256::new();
 	hasher.update(input.as_bytes());
+	let result  = hasher.finalize();
+	let encoded = hex::encode(result);
+	encoded
+}
+
+pub fn sha256_digest_bytes(input: &[u8]) -> String {
+	let mut hasher = Sha256::new();
+	hasher.update(input);
 	let result  = hasher.finalize();
 	let encoded = hex::encode(result);
 	encoded
