@@ -1,21 +1,25 @@
-use std::fmt::Display;
-use std::fs::File;
-use csv::ByteRecordsIntoIter;
+use crate::component::source::csv_adapter::CsvState;
 use crate::component::source::{Source, SourceState};
-use crate::Error;
 use crate::model::ir::atom::Atom;
+use crate::model::ir::atom::Atom::ValueSequence;
+use crate::model::ir::data_record::DataRecord;
+use crate::Error;
+use std::fmt::Display;
 
-type CsvSourceState = SourceState<csv::ByteRecordsIntoIter<File>>;
+type CsvSourceState = SourceState<CsvState>;
 
 pub struct CsvSource {
-	file:  File,
-	state: CsvSourceState,
+	file_path:  String,
+	state:      CsvSourceState,
 }
 
 impl Source for CsvSource {
 	fn initialize<CFG: Display>(&mut self, cfg: &CFG) -> Result<(), Error> {
-		print!("TODO: Initializing CSV source {}", cfg);
-		todo!()
+		let msg = format!("[CsvSource    ]: Initializing {}. TODO: Actually use configuration", cfg);
+		println!("{msg}");
+		let csv_state = CsvState::new(&self.file_path)?;
+		self.state    = SourceState::Ready(csv_state);
+		Ok(())
 	}
 
 	fn finish(&mut self) -> Result<bool, Error> {
@@ -24,34 +28,21 @@ impl Source for CsvSource {
 }
 
 impl CsvSource {
-	pub fn new(file: File) -> Self {
+	pub fn new(file_path: String) -> Self {
 		let state = SourceState::Uninitialized;
-		CsvSource{file, state}
+		CsvSource{file_path, state}
+	}
+
+	fn handle_read_error(x: csv::Error) -> CsvSourceState {
+		let msg = format!("Error reading CSV file: {}", x);
+		let err = Error::Parse(msg);
+		SourceState::Broken(err)
 	}
 }
 
 impl Iterator for CsvSource {
 	type Item = Atom;
 	fn next(&mut self) -> Option<Self::Item> {
-		let read_error = |x: csv::Error| -> CsvSourceState {
-			let msg    = format!("Error reading CSV file: {}", x);
-			let err    = Error::General(msg.into());
-			SourceState::Broken(err)
-		};
-		
-		// TODO: Setup the CSV reader to capture headers and prep an iterator
-		//
-		let handle_uninitialized = || -> Option<Self::Item> {
-			// let file  = File::open(&self.file.).expect("Unable to open file");
-			None
-		};
-
-		// TODO: Call CSV iterator and convert the result into an Atom and emit
-		// 
-		let handle_ready = |_s: &mut ByteRecordsIntoIter<File>| -> Option<Self::Item> {
-			eprintln!("TODO: Handle ready event");
-			None
-		};
 
 		// TODO: Instrument so that we're capturing next on a broken source
 		let handle_broken = |x| -> Option<Self::Item> {
@@ -64,46 +55,40 @@ impl Iterator for CsvSource {
 			eprintln!("CsvSource: Next called on completed producer");
 			None
 		};
-		
-		match &mut self.state {
-			SourceState::Uninitialized => handle_uninitialized(),
-			SourceState::Broken(err)   => handle_broken(err),
-			SourceState::Completed     => handle_completed(),
-			SourceState::Ready(s)      => handle_ready(s),
-		}
 
-		/*		
-				match &mut self.state {
-					SourceState::Uninitialized => {
-						let file       = File::open(&self.file_path).expect("Unable to open file");
-						let mut rdr    = Reader::from_reader(file);
-						match rdr.byte_headers() {
-							Err(x)      => {self.state = read_error(x); None }
-							Ok(headers) => {
-								let coordinate = compute_coordinate(&headers);
-								let atom       = compute_headers(&headers, coordinate);
-								let iter       = rdr.into_byte_records();
-								self.state     = SourceState::Ready(iter);
+		match &mut self.state {
+			SourceState::Uninitialized => {
+				let msg = String::from("Uninitialized CSV");
+				eprintln!("{msg}");
+				let err = Error::General(msg);
+				self.state = SourceState::Broken(err);
+				None
+			}
+			SourceState::Broken(err) => handle_broken(err),
+			SourceState::Completed => handle_completed(),
+			SourceState::Ready(s) => {
+				if s.header_atom.is_some() {
+					let headers = s.header_atom.take().unwrap();
+					Some(headers)
+				} else {
+					match s.iterator.next() {
+						None => None,
+						Some(r) => match r {
+							Ok(rec) => {
+								let data = DataRecord::new(&rec);
+								let atom = ValueSequence(data);
 								Some(atom)
-							},
+							}
+							Err(x) => {
+								let msg = format!("Error reading CSV file: {}", x);
+								let err = Error::Parse(msg);
+								self.state = SourceState::Broken(err);
+								None
+							}
 						}
 					}
-					SourceState::Ready(it) => {
-						match  it.next() {
-							None         => { self.state = SourceState::Completed; None }
-							Some(result) => {
-								match result {
-									Err(x) => {self.state = read_error(x); None }
-									Ok(r) => {
-										let coordinate  = compute_coordinate(&r);
-										let atom        = compute_raw_values(&r, coordinate);
-										Some(atom)
-									},
-								}
-							},
-						}
-					},
 				}
-		*/
+			}
+		}
 	}
 }

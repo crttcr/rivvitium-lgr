@@ -1,6 +1,6 @@
 use crate::Error;
 use crate::model::ir::atom_type::AtomType;
-use crate::model::ir::byte_record::ByteRecord;
+use crate::model::ir::data_record::DataRecord;
 use crate::model::ir::external_metadata::TaskVariant;
 
 
@@ -13,11 +13,11 @@ pub enum Atom
 	ErrorAtom(Error),
 	
 	// Data
-	RawValues(ByteRecord),
+	ValueSequence(DataRecord),
 	NamedValues(u8),        // TODO: Figure out how I want to model this ...
 	
 	// Metadata
-	HeaderRow(ByteRecord),
+	HeaderRow(DataRecord),
 	//	Metadata(Metadata),     // TODO: Add internal metadata message to support example in comment below
 	
 }
@@ -30,7 +30,7 @@ impl Atom {
 			Atom::FinishTask       => AtomType::Control,
 			Atom::ErrorAtom(_)     => AtomType::Control,
 			Atom::NamedValues(_)   => AtomType::Data,
-			Atom::RawValues(_)     => AtomType::Data,
+			Atom::ValueSequence(_)     => AtomType::Data,
 			Atom::HeaderRow(_)     => AtomType::Metadata,
 		}
 	}

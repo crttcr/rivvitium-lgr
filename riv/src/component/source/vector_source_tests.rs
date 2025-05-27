@@ -1,8 +1,8 @@
-use crate::model::ir::atom::Atom;
-use crate::error::Error;
-use crate::component::source::Source;
 use crate::component::source::vector_source::VectorSource;
-use crate::model::ir::external_metadata::{TaskVariant, FileMetadata, BytesMetadata};
+use crate::component::source::Source;
+use crate::error::Error;
+use crate::model::ir::atom::Atom;
+use crate::model::ir::external_metadata::{BytesMetadata, TaskVariant};
 
 #[test]
 fn uninitialized_vector_source_returns_error() {

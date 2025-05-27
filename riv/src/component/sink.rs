@@ -9,5 +9,5 @@ pub trait Sink<R>
 {
 	fn initialize<C: Display>(&mut self, cfg: &C) -> Result<(), Error>;
 	fn accept(&mut self, atom: Atom)              -> Result<(), Error>;
-	fn finalize(&mut self)                        -> Result<R,  Error>;
+	fn finish(&mut self) -> Result<R,  Error>;
 }

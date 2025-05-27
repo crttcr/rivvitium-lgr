@@ -13,8 +13,8 @@ impl ConsoleRelay {
 
 impl Relay<()> for ConsoleRelay {
 	fn initialize<C: Display>(&mut self, cfg: &C) -> Result<(), Error> {
-		println!("--- ConsoleRelay initialized ---");
-		println!("{cfg}");
+		let msg = format!("[ConsoleRelay ]: Initializing {}. TODO: Actually use configuration", cfg);
+		println!("{msg}");
 		Ok(())
 	}
 

@@ -1,4 +1,5 @@
 
+pub mod csv_adapter;
 pub mod csv_source;
 pub mod vector_source;
 

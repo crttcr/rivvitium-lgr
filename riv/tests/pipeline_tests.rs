@@ -1,14 +1,13 @@
 
 mod common;
 
-use riv::Error;
-use riv::model::ir::atom::Atom;
+use common::fixtures::TestAtoms;
 use riv::component::sink::capture_sink::CaptureSink;
 use riv::component::sink::Sink;
-use riv::component::source::Source;
 use riv::component::source::vector_source::VectorSource;
-use common::fixtures::TestAtoms;
-
+use riv::component::source::Source;
+use riv::model::ir::atom::Atom;
+use riv::Error;
 
 
 #[test]
@@ -33,7 +32,7 @@ pub fn test_capture_of_start_and_end() -> Result<(), Error> {
 	let source_ok = src.finish()?;
 	assert!(source_ok);
 	
-	let collected: Vec<Atom> = dst.finalize()?;
+	let collected: Vec<Atom> = dst.finish()?;
 	println!("{:?}", collected);
 	
 	let atoms = TestAtoms::start_end_vec();

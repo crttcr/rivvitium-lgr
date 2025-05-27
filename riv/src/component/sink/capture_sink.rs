@@ -22,7 +22,7 @@ impl CaptureSink {
 
 impl Sink<Vec<Atom>> for CaptureSink {
 	fn initialize<C: Display>(&mut self, cfg: &C) -> Result<(), Error> {
-		let msg = format!("[CaptureSink ]: initialized with config: {}", cfg);
+		let msg = format!("[CaptureSink  ]: Initializing {}. TODO: Actually use configuration", cfg);
 		println!("{msg}");
 		self.atoms.clear();
 		Ok(())
@@ -33,7 +33,7 @@ impl Sink<Vec<Atom>> for CaptureSink {
 		Ok(())
 	}
 
-	fn finalize(&mut self) -> Result<Vec<Atom>, Error> {
+	fn finish(&mut self) -> Result<Vec<Atom>, Error> {
 		let rv: Vec<Atom> = self.atoms.drain(..).collect();
 		Ok(rv)
 	}

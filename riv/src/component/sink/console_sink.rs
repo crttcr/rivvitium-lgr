@@ -16,8 +16,8 @@ impl ConsoleSink {
 impl Sink<u64> for ConsoleSink
 {
 	fn initialize<C: Display>(&mut self, cfg: &C) -> Result<(), Error> {
-		println!("--- ConsoleSink initialized ---");
-		println!("{cfg}");
+		let msg = format!("[ConsoleSink ]: Initializing {}. TODO: Actually use configuration", cfg);
+		println!("{msg}");
 		self.count = 0;
 		Ok(())
 	}
@@ -28,7 +28,7 @@ impl Sink<u64> for ConsoleSink
 		Ok(())
 	}
 
-	fn finalize(&mut self) -> Result<u64, Error> {
+	fn finish(&mut self) -> Result<u64, Error> {
 		println!("--- ConsoleSink finalized ---");
 		Ok(self.count)
 	}
