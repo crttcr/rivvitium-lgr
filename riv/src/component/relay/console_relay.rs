@@ -1,8 +1,10 @@
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
+use tracing::{info, instrument};
 use crate::Error;
 use crate::model::ir::atom::Atom;
 use crate::component::relay::Relay;
 
+#[derive(Debug)]
 pub struct ConsoleRelay;
 
 impl ConsoleRelay {
@@ -12,18 +14,22 @@ impl ConsoleRelay {
 }
 
 impl Relay<()> for ConsoleRelay {
-	fn initialize<C: Display>(&mut self, cfg: &C) -> Result<(), Error> {
-		let msg = format!("[ConsoleRelay ]: Initializing {}. TODO: Actually use configuration", cfg);
-		println!("{msg}");
+	#[instrument]
+	fn initialize<C: Display + Debug>(&mut self, _cfg: &C) -> Result<(), Error> {
 		Ok(())
 	}
 
+	// ConsoleRelay simply displays an Atom and then passes it along.
+	// Other relays might filter, change or explode an atom.
+	//
 	fn accept(&mut self, atom: Atom) -> Option<Atom> {
 		println!("{atom:?}");
-		Some(atom) // pass the atom along unmodified
+		Some(atom)
 	}
 
+	#[instrument]
 	fn finish(&mut self) -> bool {
+		info!("[ConsoleRelay Finish -- Only here to make instrumentation work]");
 		println!("--- ConsoleRelay finished ---");
 		true
 	}

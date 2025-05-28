@@ -6,7 +6,7 @@ pub mod vector_source;
 #[cfg(test)]
 mod vector_source_tests;
 
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 use crate::model::ir::atom::Atom;
 use crate::error::Error;
 
@@ -26,7 +26,7 @@ pub trait Source: Iterator<Item = Atom> {
 	/// to either Ready(S) or Broken(Error) depending on the success of
 	/// initialization
 	///
-	fn initialize<CFG: Display>(&mut self, cfg: &CFG) -> Result<(), Error>;
+	fn initialize<CFG: Display + Debug>(&mut self, cfg: &CFG) -> Result<(), Error>;
 
 	/// Produces the next atom, or `None` if finished.
 	/// Even when we have an error, we convert it into an Atom

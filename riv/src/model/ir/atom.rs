@@ -18,20 +18,19 @@ pub enum Atom
 	
 	// Metadata
 	HeaderRow(DataRecord),
-	//	Metadata(Metadata),     // TODO: Add internal metadata message to support example in comment below
-	
+	CommentRow(String),
+	BlankLine,
+	InternalMetadata         // TODO: Model this
 }
 
 impl Atom {
 	fn atom_type(&self) -> AtomType {
 		match self 
 		{
-			Atom::StartTask(_)    => AtomType::Control,
-			Atom::FinishTask       => AtomType::Control,
-			Atom::ErrorAtom(_)     => AtomType::Control,
-			Atom::NamedValues(_)   => AtomType::Data,
-			Atom::ValueSequence(_)     => AtomType::Data,
-			Atom::HeaderRow(_)     => AtomType::Metadata,
+			Atom::HeaderRow(_)      => AtomType::Metadata,
+			Atom::NamedValues(_)    => AtomType::Data,
+			Atom::ValueSequence(_)  => AtomType::Data,
+			_                       => AtomType::Control,
 		}
 	}
 }

@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::fs::File;
 use std::marker::PhantomData;
 use csv::{ByteRecord, ReaderBuilder};
@@ -11,6 +12,7 @@ use std::str;
 use crate::component::source::csv_source::CsvSource;
 use crate::Error;
 use crate::error::IoErrorWrapper;
+use std::fmt;
 
 //
 // I tried using the Type State pattern for CsvState to get compile-time
@@ -35,6 +37,14 @@ impl CsvState {
 		let iterator    = reader.into_byte_records();
 		let csv_state   = CsvState {header_atom, iterator};
 		Ok(csv_state)
+	}
+}
+
+impl Debug for CsvState {
+	fn fmt(&self, fmt: &mut std::fmt::Formatter) -> fmt::Result {
+		fmt.debug_struct("CsvState")
+		.field("header_atom", &self.header_atom)
+		.finish()
 	}
 }
 

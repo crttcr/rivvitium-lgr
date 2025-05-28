@@ -4,24 +4,26 @@ use crate::model::ir::atom::Atom;
 use crate::model::ir::atom::Atom::ValueSequence;
 use crate::model::ir::data_record::DataRecord;
 use crate::Error;
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
+use tracing::instrument;
 
 type CsvSourceState = SourceState<CsvState>;
 
+#[derive(Debug)]
 pub struct CsvSource {
 	file_path:  String,
 	state:      CsvSourceState,
 }
 
 impl Source for CsvSource {
-	fn initialize<CFG: Display>(&mut self, cfg: &CFG) -> Result<(), Error> {
-		let msg = format!("[CsvSource    ]: Initializing {}. TODO: Actually use configuration", cfg);
-		println!("{msg}");
+	#[instrument]
+	fn initialize<CFG: Display + Debug>(&mut self, _cfg: &CFG) -> Result<(), Error> {
 		let csv_state = CsvState::new(&self.file_path)?;
 		self.state    = SourceState::Ready(csv_state);
 		Ok(())
 	}
 
+	#[instrument]
 	fn finish(&mut self) -> Result<bool, Error> {
 		Ok(true)
 	}
