@@ -18,7 +18,7 @@ pub fn test_csv_pipeline() -> Result<(), Error> {
 		.init();
 
 	tracing::info!("Creating pipeline components");
-	let file_name = "../aux/data/weather_stations.10.csv".to_owned();
+	let file_name = "../auxbox/data/weather_stations.10.csv".to_owned();
 	let mut src   = CsvSource::new(file_name);
 	let mut relay = ConsoleRelay::new();
 	let mut dst   = CaptureSink::new();

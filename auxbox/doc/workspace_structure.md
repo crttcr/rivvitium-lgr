@@ -15,7 +15,7 @@ This will definitely change but serves as a starting point for discussion and co
 .
 ├── Cargo.toml          # Workspace root (virtual manifest)
 ├── .env                # Environment variables
-├── aux/                # Auxillary resources: scripts, data, doc
+├── auxbox/             # Auxillary resources: scripts, data, doc
 │   └── csv_to_csv.sh
 │   └── csv_to_sqlite.sh
 │
