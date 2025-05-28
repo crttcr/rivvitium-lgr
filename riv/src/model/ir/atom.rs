@@ -5,7 +5,7 @@ use crate::model::ir::external_metadata::TaskVariant;
 
 
 #[derive(Debug)]
-pub enum Atom
+pub enum Atom<'a>
 {
 	// Control
 	StartTask(TaskVariant),
@@ -13,17 +13,17 @@ pub enum Atom
 	ErrorAtom(Error),
 	
 	// Data
-	ValueSequence(DataRecord),
+	ValueSequence(DataRecord<'a>),
 	NamedValues(u8),        // TODO: Figure out how I want to model this ...
 	
 	// Metadata
-	HeaderRow(DataRecord),
+	HeaderRow(DataRecord<'a>),
 	CommentRow(String),
 	BlankLine,
 	InternalMetadata         // TODO: Model this
 }
 
-impl Atom {
+impl<'a> Atom<'a> {
 	fn atom_type(&self) -> AtomType {
 		match self 
 		{

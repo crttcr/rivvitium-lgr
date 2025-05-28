@@ -14,7 +14,7 @@ impl ConsoleSink {
 	}
 }
 
-impl Sink<u64> for ConsoleSink
+impl<'a> Sink<'a, u64> for ConsoleSink
 {
 	#[instrument(level = "debug", skip_all)]
 	fn initialize<C: Display + Debug>(&mut self, cfg: &C) -> Result<(), Error> {

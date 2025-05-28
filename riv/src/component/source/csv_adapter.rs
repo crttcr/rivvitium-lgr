@@ -22,12 +22,12 @@ use std::fmt;
 // and I relented, for now.
 //
 
-pub struct CsvState {
-	pub header_atom:      Option<Atom>,
+pub struct CsvState<'a> {
+	pub header_atom:      Option<Atom<'a>>,
 	pub iterator:         csv::ByteRecordsIntoIter<File>,
 }
 
-impl CsvState {
+impl<'a> CsvState<'a> {
 	pub fn new(file_path: &String) -> Result<Self, Error> {
 		let file        = File::open(file_path).map_err(IoErrorWrapper::from)?;
 		let mut reader  = ReaderBuilder::new().delimiter(b';').from_reader(file);
@@ -40,7 +40,7 @@ impl CsvState {
 	}
 }
 
-impl Debug for CsvState {
+impl<'a> Debug for CsvState<'a> {
 	fn fmt(&self, fmt: &mut std::fmt::Formatter) -> fmt::Result {
 		fmt.debug_struct("CsvState")
 		.field("header_atom", &self.header_atom)

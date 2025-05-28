@@ -8,34 +8,34 @@ use std::fmt::{Debug, Display};
 use tracing::{info, instrument};
 
 #[derive(Debug)]
-pub struct CaptureSink {
-	atoms: Vec<Atom>,
+pub struct CaptureSink<'a> {
+	atoms: Vec<Atom<'a>>,
 }
 
-impl CaptureSink {
+impl<'a> CaptureSink<'a> {
 	pub fn new() -> Self {
 		Self { atoms: Vec::new() }
 	}
 
-	pub fn into_atoms(self) -> Vec<Atom> {
+	pub fn into_atoms(self) -> Vec<Atom<'a>> {
 		self.atoms
 	}
 }
 
-impl Sink<Vec<Atom>> for CaptureSink {
+impl<'a> Sink<'_, Vec<Atom<'a>>> for CaptureSink<'a> {
 	#[instrument]
 	fn initialize<C: Display + Debug>(&mut self, _cfg: &C) -> Result<(), Error> {
 		self.atoms.clear();
 		Ok(())
 	}
 
-	fn accept(&mut self, atom: Atom) -> Result<(), Error> {
+	fn accept(&mut self, atom: Atom<'_>) -> Result<(), Error> {
 		self.atoms.push(atom);
 		Ok(())
 	}
 
 	#[instrument]
-	fn finish(&mut self) -> Result<Vec<Atom>, Error> {
+	fn finish(&mut self) -> Result<Vec<Atom<'a>>, Error> {
 		let rv: Vec<Atom> = self.atoms.drain(..).collect();
 		Ok(rv)
 	}

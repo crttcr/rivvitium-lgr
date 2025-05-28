@@ -21,7 +21,7 @@ pub enum SourceState<S> {
 }
 
 
-pub trait Source: Iterator<Item = Atom> {
+pub trait Source<'a>: Iterator<Item = Atom<'a>> {
 	/// Receive the configuration and move the source from Uninitialized
 	/// to either Ready(S) or Broken(Error) depending on the success of
 	/// initialization

@@ -7,15 +7,15 @@ use crate::Error;
 use std::fmt::{Debug, Display};
 use tracing::instrument;
 
-type CsvSourceState = SourceState<CsvState>;
+type CsvSourceState<'a> = SourceState<CsvState<'a>>;
 
 #[derive(Debug)]
-pub struct CsvSource {
+pub struct CsvSource<'a> {
 	file_path:  String,
-	state:      CsvSourceState,
+	state:      CsvSourceState<'a>,
 }
 
-impl Source for CsvSource {
+impl<'a> Source<'a> for CsvSource<'a> {
 	#[instrument]
 	fn initialize<CFG: Display + Debug>(&mut self, _cfg: &CFG) -> Result<(), Error> {
 		let csv_state = CsvState::new(&self.file_path)?;
@@ -29,21 +29,21 @@ impl Source for CsvSource {
 	}
 }
 
-impl CsvSource {
+impl<'a> CsvSource<'a> {
 	pub fn new(file_path: String) -> Self {
 		let state = SourceState::Uninitialized;
 		CsvSource{file_path, state}
 	}
 
-	fn handle_read_error(x: csv::Error) -> CsvSourceState {
+	fn handle_read_error(x: csv::Error) -> CsvSourceState<'a> {
 		let msg = format!("Error reading CSV file: {}", x);
 		let err = Error::Parse(msg);
 		SourceState::Broken(err)
 	}
 }
 
-impl Iterator for CsvSource {
-	type Item = Atom;
+impl<'a> Iterator for CsvSource<'a> {
+	type Item = Atom<'a>;
 	fn next(&mut self) -> Option<Self::Item> {
 
 		// TODO: Instrument so that we're capturing next on a broken source

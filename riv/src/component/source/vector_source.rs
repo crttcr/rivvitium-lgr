@@ -6,23 +6,23 @@ use crate::model::ir::atom::Atom::ErrorAtom;
 use crate::component::source::{Source, SourceState};
 
 /// A `Source` that yields atoms from an in-memory Vec.
-pub struct VectorSource {
-	atoms:           Vec<Atom>,
+pub struct VectorSource<'a> {
+	atoms:           Vec<Atom<'a>>,
 	state:           SourceState<()>,
 	error_atom_sent: bool,
 }
 
-impl VectorSource {
+impl<'a> VectorSource<'a> {
 	/// Create a new VectorSource with the given atoms.
-	pub fn new(atoms: Vec<Atom>) -> Self {
+	pub fn new(atoms: Vec<Atom<'a>>) -> Self {
 		let state           = SourceState::Uninitialized;
 		let error_atom_sent = false;
 		Self {atoms, state, error_atom_sent}
 	}
 }
 
-impl Iterator for VectorSource {
-	type Item = Atom;
+impl<'a> Iterator for VectorSource<'a> {
+	type Item = Atom<'a>;
 
 	fn next(&mut self) -> Option<Self::Item> {
 		match &mut self.state {
@@ -55,7 +55,7 @@ impl Iterator for VectorSource {
 	}
 }
 
-impl Source for VectorSource {
+impl<'a> Source<'a> for VectorSource<'a> {
 	fn initialize<CFG: Display>(&mut self, cfg: &CFG) -> Result<(), Error> {
 		let msg = format!("[VectorSource]: initialized with config: {}", cfg);
 		println!("{msg}");
