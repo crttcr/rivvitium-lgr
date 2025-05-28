@@ -1,0 +1,12 @@
+[
+  { "City": "Tokyo",         "Temperature":  35.6897 },
+  { "City": "Jakarta",       "Temperature":  -6.1750 },
+  { "City": "Delhi",         "Temperature":  28.6100 },
+  { "City": "Guangzhou",     "Temperature":  23.1300 },
+  { "City": "Mumbai",        "Temperature":  19.0761 },
+  { "City": "Manila",        "Temperature":  14.5958 },
+  { "City": "Shanghai",      "Temperature":  31.1667 },
+  { "City": "São Paulo",     "Temperature": -23.5500 },
+  { "City": "Seoul",         "Temperature":  37.5600 },
+  { "City": "Mexico City",   "Temperature":  19.4333 }
+]
