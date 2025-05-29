@@ -1,21 +1,21 @@
 use crate::component::source::csv_adapter::CsvState;
 use crate::component::source::{Source, SourceState};
 use crate::model::ir::atom::Atom;
-use crate::model::ir::atom::Atom::ValueSequence;
-use crate::model::ir::data_record::DataRecord;
 use crate::Error;
 use std::fmt::{Debug, Display};
 use tracing::instrument;
+use crate::model::ir::atom::Atom::StringRowAtom;
+use crate::model::ir::string_row::StringRow;
 
 type CsvSourceState = SourceState<CsvState>;
 
 #[derive(Debug)]
-pub struct CsvSource {
+pub struct CsvStringSource {
 	file_path:  String,
 	state:      CsvSourceState,
 }
 
-impl Source for CsvSource {
+impl Source for CsvStringSource {
 	#[instrument]
 	fn initialize<CFG: Display + Debug>(&mut self, _cfg: &CFG) -> Result<(), Error> {
 		let csv_state = CsvState::new(&self.file_path)?;
@@ -29,10 +29,10 @@ impl Source for CsvSource {
 	}
 }
 
-impl CsvSource {
+impl CsvStringSource {
 	pub fn new(file_path: String) -> Self {
 		let state = SourceState::Uninitialized;
-		CsvSource{file_path, state}
+		CsvStringSource {file_path, state}
 	}
 
 	fn handle_read_error(x: csv::Error) -> CsvSourceState {
@@ -42,7 +42,7 @@ impl CsvSource {
 	}
 }
 
-impl Iterator for CsvSource {
+impl Iterator for CsvStringSource {
 	type Item = Atom;
 	fn next(&mut self) -> Option<Self::Item> {
 
@@ -77,8 +77,8 @@ impl Iterator for CsvSource {
 						None => None,
 						Some(r) => match r {
 							Ok(rec) => {
-								let data = DataRecord::new(&rec);
-								let atom = ValueSequence(data);
+								let data = StringRow::new(&rec);
+								let atom = StringRowAtom(data);
 								Some(atom)
 							}
 							Err(x) => {

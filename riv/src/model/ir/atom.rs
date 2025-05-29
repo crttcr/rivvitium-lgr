@@ -1,26 +1,27 @@
 use crate::Error;
 use crate::model::ir::atom_type::AtomType;
-use crate::model::ir::data_record::DataRecord;
+use crate::model::ir::byte_row::ByteRow;
 use crate::model::ir::external_metadata::TaskVariant;
-
+use crate::model::ir::string_row::StringRow;
 
 #[derive(Debug)]
 pub enum Atom
 {
 	// Control
-	StartTask(TaskVariant),
-	FinishTask,
+	StartDocument(TaskVariant),
+	EndDocument,
 	ErrorAtom(Error),
 	
 	// Data
-	ValueSequence(DataRecord),
-	NamedValues(u8),        // TODO: Figure out how I want to model this ...
+	StringRowAtom(StringRow),  // For sources that only enable strings
+	ByteRowAtom(ByteRow),      // For sources that supply raw bytes
+	NamedValues(u8),           // TODO: Figure out how I want to model this ...
 	
 	// Metadata
-	HeaderRow(DataRecord),
+	HeaderRow(StringRow),
 	CommentRow(String),
 	BlankLine,
-	InternalMetadata         // TODO: Model this
+	InternalMetadata           // TODO: Model this
 }
 
 impl Atom {
@@ -29,7 +30,8 @@ impl Atom {
 		{
 			Atom::HeaderRow(_)      => AtomType::Metadata,
 			Atom::NamedValues(_)    => AtomType::Data,
-			Atom::ValueSequence(_)  => AtomType::Data,
+			Atom::StringRowAtom(_)  => AtomType::Data,
+			Atom::ByteRowAtom(_)    => AtomType::Data,
 			_                       => AtomType::Control,
 		}
 	}

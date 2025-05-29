@@ -1,10 +1,13 @@
 
 pub mod csv_adapter;
-pub mod csv_source;
+pub mod csv_byte_source;
+pub mod csv_string_source;
 pub mod vector_source;
 
 #[cfg(test)]
 mod vector_source_tests;
+#[cfg(test)]
+mod csv_byte_source_tests;
 
 use std::fmt::{Debug, Display};
 use crate::model::ir::atom::Atom;

@@ -7,16 +7,16 @@ use crate::model::coordinate::coordinate::Coordinate::Position;
 use crate::model::coordinate::text_location::TextLocation;
 use crate::model::ir::atom::Atom;
 use crate::model::ir::atom::Atom::HeaderRow;
-use crate::model::ir::data_record::DataRecord;
 use std::str;
-use crate::component::source::csv_source::CsvSource;
+use crate::component::source::csv_string_source::CsvStringSource;
 use crate::Error;
 use crate::error::IoErrorWrapper;
 use std::fmt;
+use crate::model::ir::string_row::StringRow;
 
 //
-// I tried using the Type State pattern for CsvState to get compile-time
-// enforcement of the correct order of operations. However, that was complicated
+// I tried using the Type State pattern for CsvState to enable order of operations
+// enforcement at compile-time. However, that was complicated
 // because this is embedded with the CsvSource which already has a state enum
 // and this object is part of the Ready() variant. So it was getting complicated
 // and I relented, for now.
@@ -61,25 +61,7 @@ pub fn compute_coordinate(r: &ByteRecord) -> Coordinate {
 	}
 }
 
-// TODO: This should only be used to get the header values.
-// Right now we don't have a better approach so this is also being applied
-// to data rows which means a bunch of allocs and string conversions for
-// every record we read in ...
-//
-// TODO: Error reporting when we fail to convert
-//
-pub fn extract_strings(r: &ByteRecord) -> Vec<String> {
-	let mut rv = Vec::new();
-	for field in r.iter() {
-		match str::from_utf8(field) {
-			Ok(s)  => rv.push(s.to_owned()),
-			Err(_) => rv.push("".to_owned())
-		}
-	}
-	rv
-}
-
 pub fn compute_headers(r: &ByteRecord) -> Atom {
-	let data_record = DataRecord::new(r);
+	let data_record = StringRow::new(r);
 	HeaderRow(data_record)
 }

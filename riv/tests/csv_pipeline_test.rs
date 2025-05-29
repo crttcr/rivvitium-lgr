@@ -2,7 +2,7 @@ use riv::component::relay::console_relay::ConsoleRelay;
 use riv::component::relay::Relay;
 use riv::component::sink::capture_sink::CaptureSink;
 use riv::component::sink::Sink;
-use riv::component::source::csv_source::CsvSource;
+use riv::component::source::csv_string_source::CsvStringSource;
 use riv::component::source::Source;
 use riv::Error;
 use tracing_subscriber::{fmt, EnvFilter};
@@ -19,7 +19,7 @@ pub fn test_csv_pipeline() -> Result<(), Error> {
 
 	tracing::info!("Creating pipeline components");
 	let file_name = "../auxbox/data/weather_stations.10.csv".to_owned();
-	let mut src   = CsvSource::new(file_name);
+	let mut src   = CsvStringSource::new(file_name);
 	let mut relay = ConsoleRelay::new();
 	let mut dst   = CaptureSink::new();
 

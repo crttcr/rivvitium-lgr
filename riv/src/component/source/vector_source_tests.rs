@@ -9,8 +9,8 @@ fn uninitialized_vector_source_returns_error() {
 	let bytes   = "test_initialize_and_iterate".as_bytes();
 	let meta    = BytesMetadata::for_bytes(bytes, None);
 	let variant = TaskVariant::Bytes(meta);
-	let atom    = Atom::StartTask(variant);
-	let atoms   = vec![atom, Atom::FinishTask];
+	let atom    = Atom::StartDocument(variant);
+	let atoms   = vec![atom, Atom::EndDocument];
 	let src     = VectorSource::new(atoms);
 	let collected: Vec<Atom> = src.collect();
 	let head                 = collected.get(0);
@@ -24,8 +24,8 @@ fn test_initialize_and_iterate() -> Result<(), Error> {
 	let bytes    = "test_initialize_and_iterate".as_bytes();
 	let meta     = BytesMetadata::for_bytes(bytes, None);
 	let variant  = TaskVariant::Bytes(meta);
-	let atom     = Atom::StartTask(variant);
-	let atoms    = vec![atom, Atom::FinishTask, ];
+	let atom     = Atom::StartDocument(variant);
+	let atoms    = vec![atom, Atom::EndDocument, ];
 	let mut  src = VectorSource::new(atoms);
 	let msg = src.initialize(&"cfg".to_string())?;
 	//assert_eq!(msg, "VectorSource initialized with config: cfg");

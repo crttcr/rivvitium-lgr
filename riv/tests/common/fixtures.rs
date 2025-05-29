@@ -13,12 +13,12 @@ impl TestAtoms {
 		let f = x.path_string();
 		let v = FileMetadata::for_file(f, None).unwrap();
 		let v = TaskVariant::File(v);
-		Atom::StartTask(v)
+		Atom::StartDocument(v)
 	}
 	
 	pub fn start_end_vec() -> Vec<Atom> { 
 		let a = Self::create_start_file_atom();
-		let b = Atom::FinishTask;
+		let b = Atom::EndDocument;
 		vec![a,b]}
 }
 
