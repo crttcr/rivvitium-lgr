@@ -9,7 +9,7 @@ fn main() -> std::io::Result<()> {
 	// Prepare data, csv_core reader, and output buffers
 	//
 	let data         = read_file("weather_stations.10.csv")?;
-	let mut rdr      = ReaderBuilder::new().delimiter(b';').build();
+	let mut reader   = ReaderBuilder::new().delimiter(b';').build();
 	let mut input    = data.as_slice();
 	let mut out_buf  = vec![0u8; 8 * 1024];
 	let mut ends_buf = vec![0usize; 128];
@@ -17,7 +17,7 @@ fn main() -> std::io::Result<()> {
 	// Loop until all input consumed
 	//
 	loop {
-		let (result, bytes_read, bytes_written, field_count) = rdr.read_record(input, &mut out_buf, &mut ends_buf);
+		let (result, bytes_read, bytes_written, field_count) = reader.read_record(input, &mut out_buf, &mut ends_buf);
 		input = &input[bytes_read..];                           // Prep for next read
 		match result {
 			ReadRecordResult::End            => break,           // All has been read

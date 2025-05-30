@@ -36,7 +36,7 @@ impl fmt::Debug for ByteRow {
 /// The bounds of fields in a single record.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ByteRowBounds {
-	/// The starting and ending positions of each field
+	/// The ending positions of each field
 	indices: Vec<usize>,
 	/// Number of fields
 	count:  usize,
@@ -49,6 +49,7 @@ impl ByteRowBounds {
 		ByteRowBounds{indices, count}
 	}
 
+	// FIXME: We no longer have start and end	
 	/// Returns the bounds of field `i`.
 	#[inline]
 	pub fn get(&self, i: usize) -> Option<Range<usize>> {

@@ -11,7 +11,7 @@ use std::io::{BufReader, Read};
 use csv::ReaderBuilder;
 use tracing::{info, instrument, warn};
 use crate::error::IoErrorWrapper;
-use crate::model::ir::atom::Atom::ByteRowAtom;
+use crate::model::ir::atom::Atom::{ByteRowAtom, ErrorAtom};
 use crate::model::ir::byte_row::ByteRow;
 
 const MAX_RECORD_SIZE:       usize = 1024 * 16;
@@ -25,11 +25,13 @@ type CsvByteSourceState = SourceState<ByteReaderState>;
 #[derive(Debug)]
 pub struct ByteReaderState {
 	pub(crate)  file_path:      String,
-	pub(crate)  needs_fill:     bool,
+	pub(crate)  start:          usize,
+	pub(crate)  end:            usize,
 	pub(crate)  input_offset:   usize,
 	pub(crate)  total_bytes:    usize,
 	pub(crate)  chunk_count:    usize,
-	pub(crate)  chunk_buffer:   [u8; MAX_RECORD_SIZE],
+	pub(crate)  chunk_buffer:   [u8; CHUNK_SIZE],
+	pub(crate)  output_record:  [u8; MAX_RECORD_SIZE],
 	pub(crate)  field_indices:  [usize; MAX_FIELDS_PER_RECORD * 2],
 	pub(crate)  buf_reader:     BufReader<File>,
 	pub(crate)  parser:         csv_core::Reader,
@@ -37,28 +39,38 @@ pub struct ByteReaderState {
 
 impl ByteReaderState {
 	fn new(buf_reader: BufReader<File>, file_path: String, parser: csv_core::Reader) -> Self {
-		let needs_fill    = true;
+		let start         = 0;
+		let end           = 0;
 		let input_offset  = 0;
 		let total_bytes   = 0;
 		let chunk_count   = 0;
-		let chunk_buffer  = [0; MAX_RECORD_SIZE];
+		let chunk_buffer  = [0; CHUNK_SIZE];
+		let output_record = [0; MAX_RECORD_SIZE];
 		let field_indices = [0; MAX_FIELDS_PER_RECORD * 2];
-		ByteReaderState{file_path, needs_fill, input_offset, total_bytes, chunk_count, chunk_buffer, field_indices, buf_reader, parser}
+		ByteReaderState{file_path, start, end, input_offset, total_bytes, chunk_count, chunk_buffer, output_record, field_indices, buf_reader, parser}
 	}
 
-	fn fill_buffer(&mut self) -> Result<(), Error> {
+	// Have we parsed everything that has been read from the latest file read?
+	//
+	fn needs_fill(&self) -> bool {self.start == self.end}
+
+	// Read the next chunk from the file
+	//
+	fn fill_buffer(&mut self) -> Result<bool, io::Error> {
 		info!("\n--- Reading '{}' in {} byte chunks ---", self.file_path, CHUNK_SIZE);
-		let buffer              = &mut self.chunk_buffer;
-		let bytes_read_in_chunk = self.buf_reader.read(buffer).map_err(|e| Error::from(IoErrorWrapper::from(e)))?;
-		if bytes_read_in_chunk == 0 {
-			let msg = "Empty CSV file chunk".to_string();
-			let err = Error::Parse(msg);
-			Err(err)
+		let buffer = &mut self.chunk_buffer;
+		let n      = self.buf_reader.read(buffer)?;
+		if n == 0 {
+			let msg = "Empty CSV file chunk. We are done.".to_string();
+			info!("{}", msg);
+			Ok(false)
 		} else {
-			info!("Read {} bytes in {} byte chunks", bytes_read_in_chunk, self.chunk_count);
 			self.chunk_count += 1;
-			self.total_bytes += bytes_read_in_chunk;
-			Ok(())
+			self.total_bytes += n;
+			self.start        = 0;
+			self.end	         = n;
+			info!("Read {} bytes for chunk {}", n, self.chunk_count);
+			Ok(true)
 		}
 	}
 }
@@ -137,8 +149,8 @@ impl Source for CsvByteSource {
 impl Iterator for CsvByteSource {
 	type Item = Atom;
 	fn next(&mut self) -> Option<Self::Item> {
-		let handle_completed     = || { warn!("Next called on completed source"); None };
-		let handle_broken        = || { warn!("Next called on broken source");    None };
+		let handle_completed = || { warn!("Next called on completed source"); None };
+		let handle_broken    = || { warn!("Next called on broken source");    None };
 
 		match self.state {
 			SourceState::Broken(_)     => handle_broken(),
@@ -149,90 +161,60 @@ impl Iterator for CsvByteSource {
 				self.state = SourceState::Broken(err);
 				None
 			}
-			SourceState::Ready(ref mut state) =>
-				// if state.needs_fill { }
-			
-				match state.fill_buffer() {
-					Ok(_) => {
-						/*
-						// Feed the current chunk of input bytes to the reader.
-						// `read_record` returns:
-						// (result, bytes_read, bytes_written, fields_found)
-						let (result, bytes_read, bytes_written, fields_found) =
-							state.reader.read_record(
-								&state.chunk_buffer,            // The slice of input bytes to process
-								&mut state.output_buffer,       // Buffer for decoded record bytes
-								&mut state.field_indices,       // Buffer for field start/end indices
-							);
-						state.input_offset += bytes_read;       // Advance offset by # of bytes consumed in this call.
-						
-						match result {
-							ReadRecordResult::Record => {
-								// A complete record was successfully parsed!
-								println!("\nRecord Found (Input Consumed: {} bytes)", bytes_read);
-								println!("  Raw Record Data in Output Buffer ({} bytes): {:?}", bytes_written, &output_buffer[..bytes_written]);
-
-								// Extract and process each field using the `field_indices`
-								if fields_found > MAX_FIELDS_PER_RECORD {
-									eprintln!("Warning: Record has more fields ({}) than MAX_FIELDS_PER_RECORD ({}), some fields might be truncated or ignored.",
-												 fields_found, MAX_FIELDS_PER_RECORD);
-								}
-
-								for i in 0..fields_found {
-									let start = state.field_indices[i * 2];
-									let end   = state.field_indices[i * 2 + 1];
-									if end > bytes_written {
-										eprintln!("Error: Field index out of bounds for output buffer. This indicates a logic error or buffer size issue.");
-										break;
-									}
-
-									let field_bytes = &output_buffer[start..end];
-									// Convert bytes to string (assuming UTF-8) for printing
-									println!("  Field {}: {:?}", i, str::from_utf8(field_bytes).unwrap_or("[INVALID UTF-8]"));
-								}
-							}
-							ReadRecordResult::InputEmpty => {
-								// The reader consumed all the input provided in the last `read_record` call,
-								// but hasn't necessarily finished a record.
-								// In a streaming scenario (reading from file/network), you would load more
-								// data into `input_bytes` (or a buffer) here and update `input_offset`.
-								if input_offset == input_len {
-									// We've fed all available input bytes. Break the loop.
-									println!("\n--- End of all input data ---");
-									break;
-								} else {
-									// More data is available but wasn't processed in this call.
-									// This typically means the `read_record` call completed its current processing
-									// without consuming all of `input_bytes[input_offset..]`. The loop will continue.
-								}
-							}
-							ReadRecordResult::OutputFull => {
-								// The `output_buffer` is not large enough to hold the current record.
-								// You would typically handle this by resizing the buffer and retrying,
-								// or returning an error if partial records are not allowed.
-								eprintln!("\nError: Output buffer is full. Need a larger `MAX_RECORD_SIZE`.");
-								break;
-							}
-							ReadRecordResult::EndOfFile => {
-								// The reader successfully reached the end of the CSV data.
-								info!("\n--- Successfully reached End of File ---");
-								None
-							}
-							ReadRecordResult::Err(e) => {
-								// A parsing error occurred.
-								eprintln!("\nParsing Error: {:?}", e);
-								break;
-							}
-						}							
-						 */
-
-						None // Fixme
+			SourceState::Ready(ref mut state) => {
+				if state.needs_fill() {
+					match state.fill_buffer() {
+						Err(e) => {
+							warn!("{}", e);
+							let source = IoErrorWrapper::from(e);
+							let err    = Error::from(source);
+							self.state = SourceState::Broken(err);
+							return None
+						},
+						Ok(false) => {
+							self.state = SourceState::Completed;
+							return None
+							},
+						Ok(true)  => {}  // Fall through and parse the next record ...
 					}
-					Err(e) => {
-						warn!("{}", e);
-						self.state = SourceState::Broken(e);
+				}
+				
+				let input = &state.chunk_buffer[state.start..state.end];
+				let (result, bytes_read, bytes_written, field_count) = state.parser.read_record(input, &mut state.output_record, &mut state.field_indices);
+				state.start += bytes_read;                                         // Slide forward in the chunk buffer
+				match result {
+					ReadRecordResult::InputEmpty       => {                         // Need more input: loop back to refill if possible
+						self.state = SourceState::Completed;
+						let error  = Error::Parse("Input empty despite latest fill".to_string());
+						let atom   = Atom::ErrorAtom(error);
+						Some(atom)
+					}              
+					ReadRecordResult::End              => {                         // No more records (trapped EOF in the middle of parser)
+						self.state = SourceState::Completed;
+						let error  = Error::Parse("End of data".to_string());
+						let atom   = Atom::ErrorAtom(error);
+						Some(atom)
+					}                          
+					ReadRecordResult::OutputFull       => { 
+						let msg    = format!("Record too large for output buffer ({} bytes)", MAX_RECORD_SIZE);
+						let err    = Error::General(msg);
+						self.state = SourceState::Broken(err);
 						None
 					}
+					ReadRecordResult::OutputEndsFull   => { 
+						let msg    = format!("Too many fields. Limit ({})", MAX_FIELDS_PER_RECORD);
+						let err    = Error::General(msg);
+						self.state = SourceState::Broken(err);
+						None
+					}
+					ReadRecordResult::Record   => { 
+						let data   = &state.output_record[..bytes_written];
+						let bounds = &state.field_indices[..field_count  ];
+						let row    = ByteRow::new(data, bounds);
+						let atom   = Atom::ByteRowAtom(row);
+						Some(atom)
+						}
+				}
 			}
 		}
 	}
