@@ -1,5 +1,6 @@
 pub mod capture_sink;
 pub mod console_sink;
+pub mod csv_sink;
 
 use std::fmt::{Debug, Display};
 use crate::model::ir::atom::Atom;

@@ -25,7 +25,7 @@ pub enum Atom
 }
 
 impl Atom {
-	fn atom_type(&self) -> AtomType {
+	pub fn atom_type(&self) -> AtomType {
 		match self 
 		{
 			Atom::HeaderRow(_)      => AtomType::Metadata,
