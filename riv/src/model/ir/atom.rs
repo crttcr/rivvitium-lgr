@@ -1,20 +1,20 @@
 use crate::Error;
 use crate::model::ir::atom_type::AtomType;
 use crate::model::ir::byte_row::ByteRow;
-use crate::model::ir::external_metadata::TaskVariant;
+use crate::model::ir::external_metadata::SourceVariant;
 use crate::model::ir::string_row::StringRow;
 
 #[derive(Debug)]
 pub enum Atom
 {
 	// Control
-	StartDocument(TaskVariant),
-	EndDocument,
+	StartTask(SourceVariant),
+	EndTask,
 	ErrorAtom(Error),
 	
 	// Data
-	StringRowAtom(StringRow),  // For sources that only enable strings
-	ByteRowAtom(ByteRow),      // For sources that supply raw bytes
+	StringRowAtom(StringRow),  // Source supplies strings
+	ByteRowAtom(ByteRow),      // Source supplies raw bytes
 	NamedValues(u8),           // TODO: Figure out how I want to model this ...
 	
 	// Metadata

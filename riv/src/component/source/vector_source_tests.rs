@@ -2,15 +2,15 @@ use crate::component::source::vector_source::VectorSource;
 use crate::component::source::Source;
 use crate::error::Error;
 use crate::model::ir::atom::Atom;
-use crate::model::ir::external_metadata::{BytesMetadata, TaskVariant};
+use crate::model::ir::external_metadata::{BytesMetadata, SourceVariant};
 
 #[test]
 fn uninitialized_vector_source_returns_error() {
 	let bytes   = "test_initialize_and_iterate".as_bytes();
 	let meta    = BytesMetadata::for_bytes(bytes, None);
-	let variant = TaskVariant::Bytes(meta);
-	let atom    = Atom::StartDocument(variant);
-	let atoms   = vec![atom, Atom::EndDocument];
+	let variant = SourceVariant::Bytes(meta);
+	let atom    = Atom::StartTask(variant);
+	let atoms   = vec![atom, Atom::EndTask];
 	let src     = VectorSource::new(atoms);
 	let collected: Vec<Atom> = src.collect();
 	let head                 = collected.get(0);
@@ -23,9 +23,9 @@ fn uninitialized_vector_source_returns_error() {
 fn test_initialize_and_iterate() -> Result<(), Error> {
 	let bytes    = "test_initialize_and_iterate".as_bytes();
 	let meta     = BytesMetadata::for_bytes(bytes, None);
-	let variant  = TaskVariant::Bytes(meta);
-	let atom     = Atom::StartDocument(variant);
-	let atoms    = vec![atom, Atom::EndDocument, ];
+	let variant  = SourceVariant::Bytes(meta);
+	let atom     = Atom::StartTask(variant);
+	let atoms    = vec![atom, Atom::EndTask, ];
 	let mut  src = VectorSource::new(atoms);
 	let msg = src.initialize(&"cfg".to_string())?;
 	//assert_eq!(msg, "VectorSource initialized with config: cfg");

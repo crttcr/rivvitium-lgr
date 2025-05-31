@@ -1,6 +1,6 @@
 use crate::error::{Error, IoErrorWrapper};
-use crate::model::ir::external_metadata::TaskVariant::Bytes;
-use crate::model::ir::external_metadata::TaskVariant::File;
+use crate::model::ir::external_metadata::SourceVariant::Bytes;
+use crate::model::ir::external_metadata::SourceVariant::File;
 use crate::utils::digest::*;
 use std::collections::HashMap;
 use std::ffi::OsString;
@@ -97,7 +97,7 @@ impl TaskMetadata for FileMetadata {
 // Enum to represent each kind of metadata
 //
 #[derive(Debug)]
-pub enum TaskVariant {
+pub enum SourceVariant {
 	Bytes(BytesMetadata),
 	File(FileMetadata),
 //	Message(ImageContent),
@@ -108,7 +108,7 @@ pub enum TaskVariant {
 // Implement the common behavior on the enum variants using
 // match + delegation
 //
-impl TaskMetadata for TaskVariant {
+impl TaskMetadata for SourceVariant {
 	fn sha_256(&self) -> &str { 
 		match self {
 			Bytes(v) => v.sha256.as_str(),
