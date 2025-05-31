@@ -12,7 +12,7 @@ impl ByteRow {
 		let bounds = ByteRowBounds::new(ends);
 		ByteRow{values, bounds}
 	}
-	
+
 	pub fn length(&self)   -> u32  { self.bounds.count()      }
 	pub fn is_empty(&self) -> bool { self.bounds.count() == 0 }
 
@@ -22,15 +22,27 @@ impl ByteRow {
 	}
 }
 
-
+/// Implement `Debug` so that it prints the field‐values as UTF-8 strings:
 impl fmt::Debug for ByteRow {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		f.debug_struct("ByteRow")
-			.field("count", &self.length().to_string())
-			.finish()
-	}
-}
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // Collect each field slice as a UTF-8 String (using lossless conversion).
+        let fields: Vec<String> = (0..self.bounds.count())
+            .filter_map(|i| {
+                self.get(i as usize).map(|bytes| {
+                    // Convert &[u8] to String, replacing invalid UTF-8 with �
+                    String::from_utf8_lossy(bytes).into_owned()
+                })
+            })
+            .collect();
 
+        // Now format as:
+        // ByteRow { length: N, fields: ["foo", "bar", ...] }
+        f.debug_struct("ByteRow")
+            .field("length", &self.length())
+            .field("fields", &fields)
+            .finish()
+    }
+}
 
 /// The bounds of fields in a single record.
 #[derive(Clone, Debug, Eq, PartialEq)]

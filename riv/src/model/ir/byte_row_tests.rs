@@ -4,6 +4,28 @@ use crate::model::ir::byte_row::{ByteRow, ByteRowBounds};
 //
 // Bounds tests
 //
+#[test]
+ fn tokens_at_zero() {
+	  let ends = [3, 5, 9];
+	  let tb = ByteRowBounds::new(&ends);
+	  assert_eq!(tb.get(0), Some(0..3));
+	  assert_eq!(tb.get(1), Some(3..5));
+	  assert_eq!(tb.get(2), Some(5..9));
+ }
+
+ #[test]
+ fn out_of_range() {
+	  let ends = [2, 4];
+	  let tb = ByteRowBounds::new(&ends);
+	  assert_eq!(tb.get(2), None);
+	  assert_eq!(tb.get(100), None);
+ }
+
+ #[test]
+ fn empty() {
+	  let tb = ByteRowBounds::new(&[]);
+	  assert_eq!(tb.get(0), None);
+ }
 
 #[test]
 fn test_single_field() {
