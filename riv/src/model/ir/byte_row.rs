@@ -4,19 +4,18 @@ use std::fmt;
 pub struct ByteRow {
 	values:     Box<[u8]>,
 	bounds:     ByteRowBounds,
-	length:     u32,
 }
 
 impl ByteRow {
-	pub fn new(data: &[u8], bounds: &[usize]) -> Self {
+	pub fn new(data: &[u8], ends: &[usize]) -> Self {
 		let values = data.to_vec().into_boxed_slice();
-		let bounds = ByteRowBounds::new(bounds);
-		let length = bounds.count as u32;
-		ByteRow{values, bounds, length}
+		let bounds = ByteRowBounds::new(ends);
+		ByteRow{values, bounds}
 	}
-	pub fn length(&self)   -> u32  { self.length      }
-	pub fn is_empty(&self) -> bool { self.length == 0 }
 	
+	pub fn length(&self)   -> u32  { self.bounds.count()      }
+	pub fn is_empty(&self) -> bool { self.bounds.count() == 0 }
+
 	pub fn get(&self, index: usize) -> Option<&[u8]> {
 		let range = self.bounds.get(index)?;
 		Some(&self.values[range.start..range.end])
@@ -27,7 +26,7 @@ impl ByteRow {
 impl fmt::Debug for ByteRow {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		f.debug_struct("ByteRow")
-			.field("len", &self.length)
+			.field("count", &self.length().to_string())
 			.finish()
 	}
 }
@@ -38,31 +37,23 @@ impl fmt::Debug for ByteRow {
 pub struct ByteRowBounds {
 	/// The ending positions of each field
 	indices: Vec<usize>,
-	/// Number of fields
-	count:  usize,
 }
 
 impl ByteRowBounds {
 	pub fn new (values: &[usize]) -> ByteRowBounds {
 		let indices = values.to_vec();
-		let count  = indices.len() / 2;
-		ByteRowBounds{indices, count}
+		ByteRowBounds{indices}
 	}
 
-	// FIXME: We no longer have start and end	
-	/// Returns the bounds of field `i`.
+	/// Returns the bounds of field `i` if it exists, and None if it does not.
 	#[inline]
 	pub fn get(&self, i: usize) -> Option<Range<usize>> {
-		if i >= self.count {
-			return None;
-		}
-		let a     = i * 2;
-		let b     = a + 1;
-		unsafe {
-			let s = *self.indices.get_unchecked(a);
-			let e = *self.indices.get_unchecked(b);
-			Some(s..e)
-		}
+		let count = self.count();
+		if count < 1         { return None; }
+		if i as u32 >= count { return None; }
+		let end   = self.indices[i];
+		let start = if i == 0 { 0 } else { self.indices[i - 1] };
+		Some(start..end)
 	}
 
 	/// Return the last position of the last field.
@@ -75,5 +66,5 @@ impl ByteRowBounds {
 
 	/// Returns the number of fields in these bounds.
 	#[inline]
-	pub fn count(&self) -> usize { self.count }
+	pub fn count(&self) -> u32 {self.indices.len() as u32}
 }
