@@ -61,7 +61,7 @@ impl Sink<()> for CsvSink {
 		Ok(())
 	}
 
-	#[instrument]
+	#[instrument (skip(self),fields(self = "CsvSink", output_file_name=%self.output_file_name))]
 	fn finish(&mut self) -> Result<(), Error> {
 		if let Some(buf) = self.writer.take() {
 			let mut inner = buf.into_inner();
