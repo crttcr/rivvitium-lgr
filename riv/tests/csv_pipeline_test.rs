@@ -44,7 +44,7 @@ pub fn test_csv_pipeline() -> Result<(), Error> {
 	tracing::info!("Finishing components");
 	let source_ok = src.finish()?;
 	let relay_ok  = relay.finish();
-	let count    = dst.finish()?;
+	let count     = dst.finish()?;
 	assert!(source_ok);
 	assert!(relay_ok);
 	println!("{:?}", count);
