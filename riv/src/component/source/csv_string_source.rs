@@ -15,24 +15,19 @@ pub struct CsvStringSource {
 	state:      CsvSourceState,
 }
 
-impl Source for CsvStringSource {
-	#[instrument]
-	fn initialize<CFG: Display + Debug>(&mut self, _cfg: &CFG) -> Result<(), Error> {
-		let csv_state = CsvState::new(&self.file_path)?;
-		self.state    = SourceState::Ready(csv_state);
-		Ok(())
-	}
-
-	#[instrument]
-	fn finish(&mut self) -> Result<bool, Error> {
-		Ok(true)
-	}
-}
-
 impl CsvStringSource {
 	pub fn new(file_path: String) -> Self {
-		let state = SourceState::Uninitialized;
-		CsvStringSource {file_path, state}
+		match CsvState::new(&file_path) {
+			Ok(state) => {
+				let state = SourceState::Ready(state);
+				CsvStringSource {file_path, state}
+			}
+			Err(err) => {
+				let error = Error::from(err);
+				let state = SourceState::Broken(error);
+				CsvStringSource {file_path, state}
+			}	
+		}
 	}
 
 	fn handle_read_error(x: csv::Error) -> CsvSourceState {
@@ -41,6 +36,15 @@ impl CsvStringSource {
 		SourceState::Broken(err)
 	}
 }
+
+impl Source for CsvStringSource {
+	#[instrument]
+	fn finish(&mut self) -> Result<bool, Error> {
+		Ok(true)
+	}
+}
+
+
 
 impl Iterator for CsvStringSource {
 	type Item = Atom;
@@ -59,16 +63,9 @@ impl Iterator for CsvStringSource {
 		};
 
 		match &mut self.state {
-			SourceState::Uninitialized => {
-				let msg = String::from("Uninitialized CSV");
-				eprintln!("{msg}");
-				let err = Error::General(msg);
-				self.state = SourceState::Broken(err);
-				None
-			}
 			SourceState::Broken(err) => handle_broken(err),
-			SourceState::Completed => handle_completed(),
-			SourceState::Ready(s) => {
+			SourceState::Completed   => handle_completed(),
+			SourceState::Ready(s)    => {
 				if s.header_atom.is_some() {
 					let headers = s.header_atom.take().unwrap();
 					Some(headers)

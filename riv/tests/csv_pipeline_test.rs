@@ -25,11 +25,9 @@ pub fn test_csv_pipeline() -> Result<(), Error> {
 
 	tracing::info!("Initializing pipeline components");
 	let cfg             = "TODO: Use configuration".to_owned();
-	let source_msg      = src.initialize(&cfg)?;
 	let relay_msg       = relay.initialize(&cfg)?;
 	let target_msg      = dst.initialize(&cfg)?;
 
-	assert_eq!(source_msg, ());
 	assert_eq!(relay_msg,  ());
 	assert_eq!(target_msg, ());
 

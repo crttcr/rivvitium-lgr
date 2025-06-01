@@ -3,7 +3,7 @@ use crate::component::source::{Source, SourceState};
 use crate::model::ir::atom::Atom;
 use crate::Error;
 use csv_core;
-use csv_core::ReadRecordResult;
+use csv_core::{ReadRecordResult, Reader};
 use std::fmt::{Debug, Display};
 use std::fs::File;
 use std::io;
@@ -19,12 +19,11 @@ const MAX_FIELDS_PER_RECORD: usize =      1024;
 const CHUNK_SIZE:            usize = 1024 * 8;
 
 
-type CsvByteSourceState = SourceState<ByteReaderState>;
+type CsvByteSourceState<R> = SourceState<ByteReaderState<R>>;
 
 
 #[derive(Debug)]
-pub struct ByteReaderState {
-	pub(crate)  file_path:      String,
+pub struct ByteReaderState<R: Read> {
 	pub(crate)  start:          usize,
 	pub(crate)  end:            usize,
 	pub(crate)  input_offset:   usize,
@@ -33,12 +32,12 @@ pub struct ByteReaderState {
 	pub(crate)  chunk_buffer:   [u8; CHUNK_SIZE],
 	pub(crate)  output_record:  [u8; MAX_RECORD_SIZE],
 	pub(crate)  field_indices:  [usize; MAX_FIELDS_PER_RECORD * 2],
-	pub(crate)  buf_reader:     BufReader<File>,
+	pub(crate)  buf_reader:     BufReader<R>,
 	pub(crate)  parser:         csv_core::Reader,
 }
 
-impl ByteReaderState {
-	fn new(buf_reader: BufReader<File>, file_path: String, parser: csv_core::Reader) -> Self {
+impl<R: Read> ByteReaderState<R> {
+	fn new(buf_reader: BufReader<R>, parser: csv_core::Reader) -> Self {
 		let start         = 0;
 		let end           = 0;
 		let input_offset  = 0;
@@ -47,7 +46,7 @@ impl ByteReaderState {
 		let chunk_buffer  = [0; CHUNK_SIZE];
 		let output_record = [0; MAX_RECORD_SIZE];
 		let field_indices = [0; MAX_FIELDS_PER_RECORD * 2];
-		ByteReaderState{file_path, start, end, input_offset, total_bytes, chunk_count, chunk_buffer, output_record, field_indices, buf_reader, parser}
+		ByteReaderState{start, end, input_offset, total_bytes, chunk_count, chunk_buffer, output_record, field_indices, buf_reader, parser}
 	}
 
 	// Have we parsed everything that has been read from the latest file read?
@@ -57,7 +56,7 @@ impl ByteReaderState {
 	// Read the next chunk from the file
 	//
 	fn fill_buffer(&mut self) -> Result<bool, io::Error> {
-		info!("\n--- Reading '{}' in {} byte chunks ---", self.file_path, CHUNK_SIZE);
+		info!("\n--- Reading {} byte chunks ---", CHUNK_SIZE);
 		let buffer = &mut self.chunk_buffer;
 		let n      = self.buf_reader.read(buffer)?;
 		if n == 0 {
@@ -83,15 +82,17 @@ impl ByteReaderState {
 /// until the Iterator::next() is called.
 ///
 #[derive(Debug)]
-pub struct CsvByteSource {
-	file_path:          String,
-	pub(crate) state:   CsvByteSourceState,
+pub struct CsvByteSource<R: Read> {
+	pub(crate) state:   CsvByteSourceState<R>,
 }
 
-impl CsvByteSource {
-	pub fn new(file_path: String) -> Self {
-		let state        = SourceState::Uninitialized;
-		CsvByteSource{file_path, state}
+impl<R: Read> CsvByteSource<R> {
+	pub fn new(reader: R) -> Self {
+		let reader    = BufReader::new(reader);
+		let parser    = csv_core::ReaderBuilder::new().delimiter(b';').build();
+		let state     = ByteReaderState::new(reader, parser);
+		let state     = SourceState::Ready(state);
+		CsvByteSource{state}
 	}
 
 	// This is a bit goofy, but we need to return an error and
@@ -117,7 +118,8 @@ impl CsvByteSource {
 	}
 }
 
-impl Source for CsvByteSource {
+impl<R: Read> Source for CsvByteSource<R> {
+/*
 	#[instrument]
 	fn initialize<CFG: Display + Debug>(&mut self, _cfg: &CFG) -> Result<(), Error> {
 		match File::open(self.file_path.clone()) {
@@ -139,28 +141,23 @@ impl Source for CsvByteSource {
 			}
 		}
 	}
+ */
 
-	#[instrument]
+	#[instrument(skip(self))]
 	fn finish(&mut self) -> Result<bool, Error> {
 		Ok(true)
 	}
 }
 
-impl Iterator for CsvByteSource {
+impl<R: Read> Iterator for CsvByteSource<R> {
 	type Item = Atom;
 	fn next(&mut self) -> Option<Self::Item> {
 		let handle_completed = || { warn!("Next called on completed source"); None };
 		let handle_broken    = || { warn!("Next called on broken source");    None };
 
 		match self.state {
-			SourceState::Broken(_)     => handle_broken(),
-			SourceState::Completed     => handle_completed(),
-			SourceState::Uninitialized => {
-				let msg    = format!("Next called on uninitialized source");
-				let err    = Error::General(msg);
-				self.state = SourceState::Broken(err);
-				None
-			}
+			SourceState::Broken(_)            => handle_broken(),
+			SourceState::Completed            => handle_completed(),
 			SourceState::Ready(ref mut state) => {
 				if state.needs_fill() {
 					match state.fill_buffer() {

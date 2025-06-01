@@ -20,9 +20,7 @@ pub fn test_capture_of_start_and_end() -> Result<(), Error> {
 	
 	// Initialize pipeline components
 	let cfg             = "cfg".to_owned();
-	let source_msg      = src.initialize(&cfg)?;
 	let target_msg      = dst.initialize(&cfg)?;
-	assert_eq!(source_msg, ());
 	assert_eq!(target_msg, ());
 
 	for atom in &mut src {

@@ -1,5 +1,6 @@
 
 use std::fmt::Display;
+use tracing::info;
 use crate::model::ir::atom::Atom;
 use crate::error::Error;
 use crate::model::ir::atom::Atom::ErrorAtom;
@@ -15,8 +16,10 @@ pub struct VectorSource {
 impl VectorSource {
 	/// Create a new VectorSource with the given atoms.
 	pub fn new(atoms: Vec<Atom>) -> Self {
-		let state           = SourceState::Uninitialized;
+		let msg             = format!("[VectorSource]: created. Item count: {}", atoms.len());
+		let state           = SourceState::Ready(());
 		let error_atom_sent = false;
+		info!("{msg}");
 		Self {atoms, state, error_atom_sent}
 	}
 }
@@ -26,14 +29,6 @@ impl Iterator for VectorSource {
 
 	fn next(&mut self) -> Option<Self::Item> {
 		match &mut self.state {
-			SourceState::Uninitialized => {
-				let msg              = "Source::next() called on uninitialized source. Initialize first.".to_string();
-				let err              = Error::General(msg);
-				self.state           = SourceState::Broken(err.clone());
-				self.error_atom_sent = true;
-				let atom             = ErrorAtom(err.clone());
-				Some(atom)
-			}
 			SourceState::Completed     => None,
 			SourceState::Ready(_)      => {
 				let rv = self.atoms.pop();
@@ -56,13 +51,6 @@ impl Iterator for VectorSource {
 }
 
 impl Source for VectorSource {
-	fn initialize<CFG: Display>(&mut self, cfg: &CFG) -> Result<(), Error> {
-		let msg = format!("[VectorSource]: initialized with config: {}", cfg);
-		println!("{msg}");
-		self.state = SourceState::Ready(());
-		Ok(())
-	}
-
 	// Only return Ok(true) if iteration has completed
 	//
 	fn finish(&mut self) -> Result<bool, Error> {
