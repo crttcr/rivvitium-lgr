@@ -97,3 +97,29 @@ fn get_returns_correct_slices() {
 	assert_eq!(row_b.get(1), Some(&b"_world"[..]));
 	assert_eq!(row_b.get(2), None);                    // out‐of‐range
 }
+
+// 1) Iterate over raw bytes via `&row`
+#[test]
+fn test_iterate_over_slices() {
+    let data = b"foobarbaz";
+    let ends = &[3, 6, 9];
+    let row  = ByteRow::new(data, ends);
+
+    println!("Iterating raw byte‐slices:");
+    for field_bytes in &row {
+        println!("{:?}", field_bytes);
+    }
+}
+
+// Iterate over &str via the `iter_str()` method
+#[test]
+fn test_iterate_over_str() {
+    let data = b"foobarbaz";
+    let ends = &[3, 6, 9];
+    let row  = ByteRow::new(data, ends);
+
+    println!("\nIterating as &str (assuming valid UTF-8):");
+    for field_str in row.iter_str() {
+        println!("{:?}", field_str);
+    }
+}

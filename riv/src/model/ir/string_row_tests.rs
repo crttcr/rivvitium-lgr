@@ -42,9 +42,50 @@ fn test_invalid_utf8_fields() {
 	rec.push_field(&[0xFF, 0xFF, 0xFF]);
 	let row = StringRow::new(&rec);
 
-	// Should treat invalid sequence as empty string
+	// Should treat an invalid sequence as empty string
 	assert_eq!(row.count(), 1);
 	let mut iter = row.into_iter();
 	assert_eq!(iter.next(), Some(String::new()));
 	assert_eq!(iter.next(), None);
 }
+
+
+ /// Helper to create a dummy ByteRecord from an array of &str.
+ fn make_byte_record(fields: &[&str]) -> ByteRecord {
+	  let mut record = ByteRecord::new();
+	  for &f in fields {
+			record.push_field(f.as_bytes());
+	  }
+	  record
+ }
+
+ #[test]
+ fn into_iter_by_reference() {
+	  let byte_record   = make_byte_record(&["foo", "bar", "baz"]);
+	  let string_row    = StringRow::new(&byte_record);
+	  let mut collected = Vec::new();
+	  for s in &string_row {
+			collected.push(s.clone());
+	  }
+	  assert_eq!(collected, vec!["foo".to_string(), "bar".to_string(), "baz".to_string()]);
+ }
+
+ #[test]
+ fn iter_str_yields_str_slices() {
+	  let br = make_byte_record(&["one", "two"]);
+	  let row = StringRow::new(&br);
+	  let mut iter = row.iter_str();
+	  assert_eq!(iter.next(), Some("one"));
+	  assert_eq!(iter.next(), Some("two"));
+	  assert_eq!(iter.next(), None);
+ }
+
+ #[test]
+ fn iter_bytes_yields_byte_slices() {
+	  let br = make_byte_record(&["αβ", "γδ"]);
+	  let row = StringRow::new(&br);
+	  let mut iter = row.iter_bytes();
+	  assert_eq!(iter.next(), Some("αβ".as_bytes()));
+	  assert_eq!(iter.next(), Some("γδ".as_bytes()));
+	  assert_eq!(iter.next(), None);
+ }

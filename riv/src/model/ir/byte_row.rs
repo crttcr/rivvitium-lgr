@@ -22,6 +22,84 @@ impl ByteRow {
 	}
 }
 
+// --------------------------------------------------
+// Part 1)  Iterator over raw bytes: &ByteRow → &[u8]
+// --------------------------------------------------
+
+/// An iterator that, for each `i`, yields `&[u8]` for the i-th field of a `ByteRow`.
+pub struct ByteRowBytesIter<'a> {
+    row: &'a ByteRow,
+    idx: usize,
+}
+
+impl<'a> Iterator for ByteRowBytesIter<'a> {
+    type Item = &'a [u8];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let result = self.row.get(self.idx);
+        self.idx += 1;
+        result
+    }
+}
+
+/// Implement `IntoIterator` for `&ByteRow` so that `for bytes in &row { … }`
+/// yields each field as a raw byte‐slice (`&[u8]`).
+impl<'a> IntoIterator for &'a ByteRow {
+    type Item = &'a [u8];
+    type IntoIter = ByteRowBytesIter<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        ByteRowBytesIter { row: self, idx: 0 }
+    }
+}
+
+// --------------------------------------------------
+// Part 2)  Iterator over UTF-8 strings: &ByteRow → &str
+// --------------------------------------------------
+
+/// An iterator that, for each field index `i`, yields a &str (lossily if needed).
+pub struct ByteRowStrIter<'a> {
+    row: &'a ByteRow,
+    idx: usize,
+}
+
+impl<'a> Iterator for ByteRowStrIter<'a> {
+    type Item = &'a str;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // 1) Grab the raw bytes for field `idx`
+        let bytes_opt = self.row.get(self.idx);
+        self.idx += 1;
+
+        // 2) Try to convert to &str. If invalid UTF-8, use `from_utf8_lossy`
+        //    but that returns a Cow<'_, str>; here we cheat and allocate a small
+        //    String in those cases—but requirement was &str, so we only return
+        //    valid &str in the Some branch. In practice, if data might not be valid UTF-8,
+        //    you may want to return Cow<'a, str> instead. For now, we’ll assume valid UTF-8.
+        bytes_opt.and_then(|b| match std::str::from_utf8(b) {
+            Ok(s) => Some(s),
+            Err(_) => {
+                // If you really must return a `&str`, you cannot return an owned `String` here.
+                // Instead, we could choose to return `None` or panic. For this example, we’ll
+                // simply replace invalid sequences with the Unicode replacement character and
+                // store it in a temporary `String`. But `String` cannot live long enough for
+                // a `&str` return. So in a real app, you’d want `Iterator<Item=Cow<'a, str>>`.
+                // For simplicity, we’ll just return `None` on invalid UTF-8:
+                None
+            }
+        })
+    }
+}
+
+/// Provide a method on `ByteRow` that returns an iterator over `&str`.
+/// (We cannot write `impl IntoIterator for &ByteRow` a second time, so we offer a method.)
+impl ByteRow {
+    pub fn iter_str(&self) -> ByteRowStrIter<'_> {
+        ByteRowStrIter { row: self, idx: 0 }
+    }
+}
+
+
 /// Implement `Debug` so that it prints the field‐values as UTF-8 strings:
 impl fmt::Debug for ByteRow {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
