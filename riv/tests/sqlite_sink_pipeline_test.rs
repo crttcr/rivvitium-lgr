@@ -6,11 +6,12 @@ use riv::component::source::Source;
 use riv::Error;
 use tracing_subscriber::{fmt, EnvFilter};
 use tracing_subscriber::fmt::format::FmtSpan;
-use riv::component::sink::csv_sink::CsvSink;
+use riv::component::sink::sqlite_sink::SqliteSink;
 use riv::component::source::csv_byte_source::CsvByteSource;
+//use riv::component::source::csv_string_source::CsvStringSource;
 
 #[test]
-pub fn run_csv_byte_pipeline() -> Result<(), Error> {
+pub fn run_sqlite_pipeline() -> Result<(), Error> {
 	// Startup
 	let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("debug"));
 	fmt::Subscriber::builder()
@@ -19,12 +20,13 @@ pub fn run_csv_byte_pipeline() -> Result<(), Error> {
 		.init();
 
 	tracing::info!("Creating pipeline components");
-	let file_name = "../auxbox/data/weather_stations.10.csv".to_owned();
-	let file      =  File::open(file_name).expect("File open failed");
-	let mut src   = CsvByteSource::new(file);
-	let mut relay = ConsoleRelay::new();
-//	let mut dst   = CaptureSink::new();
-	let mut dst   = CsvSink::new("csv_byte_output.csv".to_string());
+	let input_file  = "../auxbox/data/weather_stations.10.csv".to_owned();
+	let output_file = "/tmp/weather_stations.10.db".to_owned();
+	let input_file  = File::open(input_file).expect("File open failed");
+	let mut src     = CsvByteSource::new(input_file);
+//	let mut src     = CsvStringSource::new(input_file);
+	let mut relay   = ConsoleRelay::new();
+	let mut dst     = SqliteSink::new(output_file);
 
 	tracing::info!("Initializing pipeline components");
 	let cfg             = "TODO: Use configuration".to_owned();

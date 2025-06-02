@@ -1,6 +1,6 @@
 use csv::ByteRecord;
 use std::str;
-
+use crate::model::ir::byte_row::ByteRow;
 
 /// A row of owned `String` values (e.g. converted from a `ByteRecord`).
 #[derive(Debug)]
@@ -13,6 +13,10 @@ impl StringRow {
 		let values = extract_strings(r);
 		let values = values.into_boxed_slice();
 		StringRow{values}
+	}
+	pub fn new_from_byte_row(r: &ByteRow) -> Self {
+		let vx = r.iter_str().map(|s| s.to_string()).collect::<Vec<String>>();
+		StringRow{values: vx.into_boxed_slice()}
 	}
 	
 	pub fn count(&self)    -> u32  { self.values.len() as u32}

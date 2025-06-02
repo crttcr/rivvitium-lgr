@@ -2,8 +2,8 @@ use std::io;
 use thiserror::Error; // Make sure thiserror is in your Cargo.toml
 
 // 1. Define a cloneable wrapper for std::io::Error information
-#[derive(Clone, Debug)]
-pub struct IoErrorWrapper 
+#[derive(Clone, Debug, PartialEq)]
+pub struct IoErrorWrapper
 {
 	kind:     io::ErrorKind,
 	message:  String,

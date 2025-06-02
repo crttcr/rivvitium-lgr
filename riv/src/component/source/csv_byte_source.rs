@@ -11,7 +11,7 @@ use std::io::{BufReader, Read};
 use csv::ReaderBuilder;
 use tracing::{info, instrument, warn};
 use crate::error::IoErrorWrapper;
-use crate::model::ir::atom::Atom::{ByteRowAtom, ErrorAtom};
+use crate::model::ir::atom::Atom::{ByteRowAtom, ErrorAtom, HeaderRow};
 use crate::model::ir::byte_row::ByteRow;
 
 const MAX_RECORD_SIZE:       usize = 1024 * 16;
@@ -29,24 +29,26 @@ pub struct ByteReaderState<R: Read> {
 	pub(crate)  input_offset:   usize,
 	pub(crate)  total_bytes:    usize,
 	pub(crate)  chunk_count:    usize,
+	pub(crate)  needs_header:   bool,
 	pub(crate)  chunk_buffer:   [u8; CHUNK_SIZE],
 	pub(crate)  output_record:  [u8; MAX_RECORD_SIZE],
 	pub(crate)  field_indices:  [usize; MAX_FIELDS_PER_RECORD * 2],
 	pub(crate)  buf_reader:     BufReader<R>,
-	pub(crate)  parser:         csv_core::Reader,
+	pub(crate)  parser:         Reader,
 }
 
 impl<R: Read> ByteReaderState<R> {
-	fn new(buf_reader: BufReader<R>, parser: csv_core::Reader) -> Self {
+	fn new(buf_reader: BufReader<R>, parser: Reader) -> Self {
 		let start         = 0;
 		let end           = 0;
 		let input_offset  = 0;
 		let total_bytes   = 0;
 		let chunk_count   = 0;
+		let needs_header  = true;
 		let chunk_buffer  = [0; CHUNK_SIZE];
 		let output_record = [0; MAX_RECORD_SIZE];
 		let field_indices = [0; MAX_FIELDS_PER_RECORD * 2];
-		ByteReaderState{start, end, input_offset, total_bytes, chunk_count, chunk_buffer, output_record, field_indices, buf_reader, parser}
+		ByteReaderState{start, end, input_offset, total_bytes, chunk_count, needs_header, chunk_buffer, output_record, field_indices, buf_reader, parser}
 	}
 
 	// Have we parsed everything that has been read from the latest file read?
@@ -178,7 +180,7 @@ impl<R: Read> Iterator for CsvByteSource<R> {
 				
 				let input = &state.chunk_buffer[state.start..state.end];
 				let (result, bytes_read, bytes_written, field_count) = state.parser.read_record(input, &mut state.output_record, &mut state.field_indices);
-				state.start += bytes_read;                                         // Slide forward in the chunk buffer
+				state.start      += bytes_read;                                         // Slide forward in the chunk buffer
 				match result {
 					ReadRecordResult::InputEmpty       => {                         // Need more input: loop back to refill if possible
 						self.state = SourceState::Completed;
@@ -207,10 +209,17 @@ impl<R: Read> Iterator for CsvByteSource<R> {
 					ReadRecordResult::Record   => { 
 						let data   = &state.output_record[..bytes_written];
 						let bounds = &state.field_indices[..field_count  ];
-						let row    = ByteRow::new(data, bounds);
-						let atom   = Atom::ByteRowAtom(row);
+						let atom   = if state.needs_header {
+							state.needs_header = false;
+							let row            = ByteRow::new(data, bounds);
+							let row            = row.as_string_row();
+							HeaderRow(row)
+						} else {
+							let row    = ByteRow::new(data, bounds);
+							ByteRowAtom(row)
+						};
 						Some(atom)
-						}
+					}
 				}
 			}
 		}

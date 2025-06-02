@@ -1,5 +1,6 @@
 use std::ops::Range;
 use std::fmt;
+use crate::model::ir::string_row::StringRow;
 
 pub struct ByteRow {
 	values:     Box<[u8]>,
@@ -19,6 +20,10 @@ impl ByteRow {
 	pub fn get(&self, index: usize) -> Option<&[u8]> {
 		let range = self.bounds.get(index)?;
 		Some(&self.values[range.start..range.end])
+	}
+	
+	pub fn as_string_row(&self) -> StringRow {
+		StringRow::new_from_byte_row(self)
 	}
 }
 
