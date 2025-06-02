@@ -1,3 +1,4 @@
+
 mod common;
 
 use common::fixtures::TestAtoms;
@@ -8,15 +9,20 @@ use riv::component::source::Source;
 use riv::model::ir::atom::Atom;
 use riv::Error;
 
+
 #[test]
-pub fn test_capture_of_start_and_end() -> Result<(), Error> {
-	let atoms    = TestAtoms::start_end_vec();             // Create pipeline components
+pub fn nv_pipeline_test() -> Result<(), Error> {
+
+	// Create pipeline components
+	let atoms    = TestAtoms::nv_pairs();
 	let mut  src = VectorSource::new(atoms);
 	let mut  dst = CaptureSink::new();
 
-	let cfg             = "cfg".to_owned();                // Initialize pipeline components
+	// Initialize pipeline components
+	let cfg             = "cfg".to_owned();
 	let target_msg      = dst.initialize(&cfg)?;
 	assert_eq!(target_msg, ());
+
 	for atom in &mut src {
 		dst.accept(atom)?;
 	}
@@ -26,6 +32,8 @@ pub fn test_capture_of_start_and_end() -> Result<(), Error> {
 
 	let collected: Vec<Atom> = dst.finish()?;
 	println!("{:?}", collected);
-	assert_eq!(collected.len(), TestAtoms::nv_pairs().len());
+
+	let atoms = TestAtoms::nv_pairs();
+	assert!(collected.len() == atoms.len());
 	Ok(())
 }
