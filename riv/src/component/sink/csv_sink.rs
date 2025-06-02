@@ -40,20 +40,23 @@ impl Sink<()> for CsvSink {
 	fn accept(&mut self, atom: Atom) -> Result<(), Error> {
 		if atom.atom_type() == AtomType::Control {return Ok(())}
 		let mut writer = self.writer.take().unwrap();
+		let e_map      = |e: csv::Error| { Error::from(e) };
 		
 		match atom {
 			Atom::ByteRowAtom(byte_row) => {
-				println!("{:?}", byte_row);
+				let vec  = byte_row.into_iter().collect::<Vec<_>>();
+				let data = vec.into_boxed_slice();
+				writer.write_record(data).map_err(e_map)?;
 			},
 			Atom::StringRowAtom(string_row) => {
 				let vec  = string_row.into_iter().collect::<Vec<_>>();
 				let data = vec.into_boxed_slice();
-				writer.write_record(data).map_err(|e| Error::General(e.to_string()))?;
+				writer.write_record(data).map_err(e_map)?;
 			},
 			Atom::HeaderRow(header_row) => {
 				let vec  = header_row.into_iter().collect::<Vec<_>>();
 				let data = vec.into_boxed_slice();
-				writer.write_record(data).map_err(|e| Error::General(e.to_string()))?;
+				writer.write_record(data).map_err(e_map)?;
 			},
 			_ => {},
 		}

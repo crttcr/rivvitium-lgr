@@ -21,7 +21,7 @@ pub fn test_csv_pipeline() -> Result<(), Error> {
 	let file_name = "../auxbox/data/weather_stations.10.csv".to_owned();
 	let mut src   = CsvStringSource::new(file_name);
 	let mut relay = ConsoleRelay::new();
-	let mut dst   = CsvSink::new("foo.csv".to_string());
+	let mut dst   = CsvSink::new("csv_string_output.csv".to_string());
 
 	tracing::info!("Initializing pipeline components");
 	let cfg             = "TODO: Use configuration".to_owned();

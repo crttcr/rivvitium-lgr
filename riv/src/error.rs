@@ -26,3 +26,23 @@ pub enum Error
 	#[error("General error: {0}")]
 	General(String),
 }
+
+/// Convert a `csv::Error` into our `Error` enum.
+/// 
+use std::{error::Error as StdError, io};
+impl From<csv::Error> for Error {
+    fn from(err: csv::Error) -> Self {
+        // Try to see if the csv::Error was caused by an underlying io::Error
+        if let Some(source) = err.source() {
+            // If the source is an io::Error, wrap it
+            if let Some(io_err) = source.downcast_ref::<io::Error>() {
+                // Create a fresh io::Error with the same kind and message
+                let cloned = io::Error::new(io_err.kind(), io_err.to_string());
+                let wrapper = IoErrorWrapper::from(cloned);
+                return Error::Io { source: wrapper };
+            }
+        }
+        // Otherwise, treat it as a parse error
+        Error::Parse(err.to_string())
+    }
+}

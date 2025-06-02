@@ -7,6 +7,7 @@ use riv::component::source::Source;
 use riv::Error;
 use tracing_subscriber::{fmt, EnvFilter};
 use tracing_subscriber::fmt::format::FmtSpan;
+use riv::component::sink::csv_sink::CsvSink;
 use riv::component::source::csv_byte_source::CsvByteSource;
 
 #[test]
@@ -23,7 +24,8 @@ pub fn run_csv_byte_pipeline() -> Result<(), Error> {
 	let file      =  File::open(file_name).expect("File open failed");
 	let mut src   = CsvByteSource::new(file);
 	let mut relay = ConsoleRelay::new();
-	let mut dst   = CaptureSink::new();
+//	let mut dst   = CaptureSink::new();
+	let mut dst   = CsvSink::new("csv_byte_output.csv".to_string());
 
 	tracing::info!("Initializing pipeline components");
 	let cfg             = "TODO: Use configuration".to_owned();
