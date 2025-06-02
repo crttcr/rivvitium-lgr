@@ -26,6 +26,6 @@ pub fn test_capture_of_start_and_end() -> Result<(), Error> {
 
 	let collected: Vec<Atom> = dst.finish()?;
 	println!("{:?}", collected);
-	assert_eq!(collected.len(), TestAtoms::nv_pairs().len());
+	assert_eq!(collected.len(), TestAtoms::start_end_vec().len());
 	Ok(())
 }
