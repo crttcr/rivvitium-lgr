@@ -1,0 +1,76 @@
+// ui/app_window.slint
+
+// Import necessary modules
+// Make sure to import Button (and StandardButton if you truly intend to use it elsewhere)
+import { StandardButton, Button } from "std-widgets.slint";
+
+// Import your page components
+// Ensure these individual page components also have 'export' in their own .slint files
+import { LoginPage } from "pages/login_page.slint";
+import { DashboardPage } from "pages/dashboard_page.slint";
+import { SettingsPage } from "pages/settings_page.slint";
+
+
+// Define an enum to represent our different pages
+export enum Page { // <-- ADDED 'export' here
+    Login,
+    Dashboard,
+    Settings
+}
+
+// Your main application component
+export component AppWindow inherits Window { // <-- ADDED 'export' here
+    width: 600px;
+    height: 400px;
+    title: "Multi-Page Slint App";
+
+    in-out property <Page> current-page: Page.Login;
+
+    // These callbacks are for navigation
+    callback switch_to_login();
+    callback switch_to_dashboard();
+    callback switch_to_settings();
+
+    // Add a new callback that LoginPage will trigger
+    // MOVED THIS CALLBACK HERE (inside AppWindow's main body, before nested layouts)
+    callback login_requested_from_child(string, string);
+
+
+    // This is the main layout for the AppWindow's content
+    // Removed the outer, redundant VerticalLayout wrapper here
+    VerticalLayout {
+        padding: 10px;
+        spacing: 10px;
+
+        // --- Navigation Bar ---
+        HorizontalLayout {
+            spacing: 5px;
+            Button { text: "Login"; clicked => { root.switch_to_login(); } }
+            Button { text: "Dashboard"; clicked => { root.switch_to_dashboard(); } }
+            Button { text: "Settings"; clicked => { root.switch_to_settings(); } }
+        }
+
+        // --- Page Content Area ---
+        // This is the container for your pages
+        // (If StackLayout becomes available, you'd replace this VerticalLayout with StackLayout)
+        VerticalLayout {
+            padding: 0;
+            spacing: 0;
+            // The pages inside this layout will manage their own visibility
+
+            LoginPage {
+                login_requested(u, p) => { root.login_requested_from_child(u, p); }
+                visible: root.current-page == Page.Login;
+            }
+
+            DashboardPage {
+                visible: root.current-page == Page.Dashboard;
+            }
+
+            SettingsPage {
+                visible: root.current-page == Page.Settings;
+            }
+        }
+    }
+}
+// Removed the redundant export { AppWindow } here, as 'export component AppWindow' is sufficient

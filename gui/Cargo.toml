@@ -1,9 +1,14 @@
 [package]
-name       = "gui"
+name       = "rivvitium"
 version    = "0.1.0"
 edition    = "2024"
+build      = "build.rs"
+
 
 [dependencies]
-riv   =      {path = "../riv"}
-zed   =      {path = "../zed"}
+riv           = {path = "../riv"}
+slint         = "1.11.0"
+zed           = {path = "../zed"}
 
+[build-dependencies]
+slint-build = "1.11.0"
