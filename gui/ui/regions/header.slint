@@ -1,0 +1,31 @@
+
+
+
+// A header bar at the top
+export component Header inherits Rectangle {
+    height:             60px;
+    background:       #cbfeaf;
+    horizontal-stretch: 1;
+
+    // Use a HorizontalLayout to place icon + text side by side
+    HorizontalLayout {
+        spacing: 10px;
+        padding: 10px;
+
+    Image {
+        source: @image-url("../assets/logos/rivvitium.svg");
+        // colorize: darkorange;
+        }
+    Rectangle {
+        horizontal-stretch: 1;
+        vertical-stretch:   1;
+        Text {
+            text: "Rivvitium";
+            font-size: 24px;
+            color:   #309ed0;
+            vertical-alignment: center;
+            horizontal-alignment: center;
+            }
+        }
+    }
+}
