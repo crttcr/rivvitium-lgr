@@ -2180,6 +2180,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "gui"
+version = "0.1.0"
+dependencies = [
+ "riv",
+ "slint",
+ "slint-build",
+ "zed",
+]
+
+[[package]]
 name = "half"
 version = "2.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4320,16 +4330,6 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "ulid",
- "zed",
-]
-
-[[package]]
-name = "rivvitium"
-version = "0.1.0"
-dependencies = [
- "riv",
- "slint",
- "slint-build",
  "zed",
 ]
 
