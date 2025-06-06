@@ -1,10 +1,16 @@
 use simd_json::BorrowedValue;
 use simd_json::prelude::ValueAsScalar;
 use std::fs::File;
+use std::env;
 use std::io::{self, BufReader, Read, Result};
+use riv::data_file_path_as_str;
 
 fn main() -> Result<()> {
-	let file       = File::open("data.json")?;                       // Open the JSON file
+	let file       = data_file_path_as_str("weather_stations.3.array.json");
+	println!("Loading json array: {}", file);
+	let current_dir = env::current_dir()?;
+	println!("Pwd : {:?}", current_dir);
+	let file       = File::open(file)?;
 	let mut reader = BufReader::new(file);
 	let e_no_array_start = io::Error::new(io::ErrorKind::UnexpectedEof, "Reached EOF before finding '['");
 
