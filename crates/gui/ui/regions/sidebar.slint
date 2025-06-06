@@ -1,0 +1,29 @@
+import {Button} from "std-widgets.slint";
+
+// A vertical navigation sidebar
+export component Sidebar inherits Rectangle {
+    width:        180px;
+    background: #3B4252;
+    vertical-stretch: 1;
+    
+    // Expose a property so parent can bind the same currentPage
+    in-out property<int> currentPage: 0;
+
+    VerticalLayout {
+        padding: 10px;
+        spacing: 8px;
+
+        Text {
+            text: "Menu";
+            font-size: 18px;
+            color: #ECEFF4;
+            horizontal-alignment: center;
+            padding: 6px;
+        }
+
+        Rectangle { background: red;    width:           10px; }
+        Rectangle { background: blue;   min-width:       10px; }
+        Rectangle { background: yellow; vertical-stretch:   1; }
+        Rectangle { background: green;  vertical-stretch:   2; }
+    }
+}

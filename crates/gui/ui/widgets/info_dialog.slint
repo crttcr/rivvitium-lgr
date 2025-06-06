@@ -1,0 +1,35 @@
+// ui/widgets/info_dialog.slint
+
+import { StandardButton } from "std-widgets.slint";
+
+// Define and export a dialog component named “InfoDialog” that inherits Dialog
+export component InfoDialog inherits Dialog {
+    width:     300px;
+    height:    150px;
+    title:     "Information";
+    visible:   false;
+    background: #3cf093;
+
+    // Slint’s run_as_dialog() watches for accepted() or rejected()
+    callback accepted();
+    callback rejected(); // (not used in this example)
+
+    VerticalLayout {
+        padding: 20px;
+        spacing: 10px;
+        alignment: center;
+
+        Text {
+            text: "This is a Slint dialog from\nui/widgets/info_dialog.slint";
+            font-size: 16px;
+            horizontal-alignment: center;
+        }
+
+        StandardButton {
+            kind: ok;                       // Shows a localized “OK” button
+            clicked => { 
+                root.visible = false;
+                root.accepted(); } // Emit accepted(), causing run_as_dialog() to return.
+        }
+    }
+}

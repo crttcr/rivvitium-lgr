@@ -1,0 +1,120 @@
+// ui/app_window.slint
+
+// Import necessary modules
+// Make sure to import Button (and StandardButton if you truly intend to use it elsewhere)
+import { Button, StandardButton} from "std-widgets.slint";
+
+// Import your page components
+// Ensure these individual page components also have 'export' in their own .slint files
+
+import { AboutDialog   } from "widgets/about_dialog.slint";
+import { InfoDialog    } from "widgets/info_dialog.slint";
+import { Header        } from "regions/header.slint";
+import { Sidebar       } from "regions/sidebar.slint";
+import { Footer        } from "regions/footer.slint";
+import { DashboardPage } from "pages/dashboard_page.slint";
+import { PipelinePage  } from "pages/pipeline_page.slint";
+import { ActivityPage  } from "pages/activity_page.slint";
+import { AdminPage     } from "pages/admin_page.slint";
+import { SettingsPage  } from "pages/settings_page.slint";
+
+
+// Define an enum to represent our different pages
+// Note: exported
+//
+export enum Page {
+    Dashboard,
+    Pipeline,
+    Activity,
+    Admin,
+    Settings
+}
+
+// Your main application component
+export component AppWindow inherits Window { // <-- ADDED 'export' here
+    title:  "Rivvitium";
+    width:  1400px;
+    height:  800px;
+
+    in-out property <Page> current-page: Page.Dashboard;
+
+    // Menu callbacks
+    callback help_about_click();
+
+    // Navigation callbacks
+    callback switch_to_dashboard();
+    callback switch_to_pipeline();
+    callback switch_to_activity();
+    callback switch_to_admin();
+    callback switch_to_settings();
+
+    // Add a new callback that PipelinePage will trigger (To be modified)
+    // MOVED THIS CALLBACK HERE (inside AppWindow's main body, before nested layouts)
+    callback login_requested_from_child(string, string);
+
+    aboutDialog := AboutDialog { title: "Override"; }
+    infoDialog  := InfoDialog { }
+
+    // MenuBar -- Tried factoring this out but had issues with needing to be a child of Window
+    MenuBar {
+        Menu {
+            title: @tr("MenuBar" => "File");
+            MenuItem { title: @tr("MenuBar" => "Open"); }
+            Menu {
+                title: @tr("MenuBar" => "Open Recent");
+                for x in 10: MenuItem { title: @tr("MenuBar" => "Recent {}", x+1);  }
+            }
+            MenuSeparator {}
+            MenuItem { title: @tr("MenuBar" => "Save"); }
+            Menu {
+                title: @tr("MenuBar" => "Save As");
+                for x in 10: MenuItem { title: @tr("MenuBar" => "Name {}", x+1);  }
+            }
+        }
+        Menu {
+            title: @tr("MenuBar" => "Edit");
+            MenuItem { title: @tr("MenuBar" => "Copy"); }
+            MenuItem { title: @tr("MenuBar" => "Paste"); }
+        }
+        Menu {
+            title: @tr("MenuBar" => "Help");
+            MenuItem {
+                title: "&About";
+                activated => { root.help_about_click();}
+            }
+        }
+    }
+
+    // This is the main layout for the AppWindow's content
+    // Removed the outer, redundant VerticalLayout wrapper here
+    VerticalLayout {
+        padding:  0px;
+        spacing: 10px;
+
+        Header {}
+       // --- Navigation Bar ---
+        HorizontalLayout {
+            spacing: 5px;
+            Sidebar {}
+            // --- Page Content Area ---
+            // This is the container for your pages
+            // The pages inside this layout will manage their own visibility
+            // (If StackLayout becomes available, you'd replace this VerticalLayout with StackLayout)
+            VerticalLayout {
+                padding: 0;
+                spacing: 0;
+                DashboardPage { visible: root.current-page == Page.Dashboard; }
+                ActivityPage  { visible: root.current-page == Page.Activity;  }
+                AdminPage     { visible: root.current-page == Page.Admin;     }
+                SettingsPage  { visible: root.current-page == Page.Settings;  }
+            }
+        }
+        Footer {}
+    }
+}
+
+// Button { text: "Dashboard"; clicked => { root.switch_to_dashboard(); } }
+// Button { text: "Pipeline";  clicked => { root.switch_to_pipeline();  } }
+// Button { text: "Activity";  clicked => { root.switch_to_activity();  } }
+// Button { text: "Admin";     clicked => { root.switch_to_admin();     } }
+// Button { text: "Settings";  clicked => { root.switch_to_settings();  } }

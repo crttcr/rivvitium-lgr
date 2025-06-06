@@ -1,0 +1,17 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: MIT
+
+import { AboutSlint      } from "std-widgets.slint";
+import { GallerySettings } from "../widgets/gallery_settings.slint";
+import { Page            } from "../widgets/page.slint";
+
+export component AboutPage inherits Page {
+    title: @tr("About");
+    show-enable-switch: false;
+    description: @tr("Curious now? Check the docs + getting started from Github and the website https://slint.dev and try it yourself.");
+
+    AboutSlint { }
+
+    // Spacer
+    Rectangle { }
+}
