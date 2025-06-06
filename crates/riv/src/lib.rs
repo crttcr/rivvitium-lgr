@@ -9,3 +9,4 @@ pub use crate::error::Error; // Re-export the Error type
 
 pub type Result<T> = std::result::Result<T, Error>; // Common type alias
 
+pub const AUXBOX: &str = "../../auxbox";

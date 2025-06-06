@@ -1,10 +1,13 @@
 
 [workspace]
-members = [
-    "cli",
-    "gui",
-    "riv",
-    "zed",
+members = [ 
+   "crates/apex",
+   "crates/cli",
+   "crates/gui",
+   "crates/riv", 
+   "crates/riv-app-egui", 
+   "crates/riv-app-slint",
+   "crates/zed",
 ]
 
 resolver = "3"
