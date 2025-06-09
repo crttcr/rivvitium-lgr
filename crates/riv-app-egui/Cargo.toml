@@ -9,4 +9,6 @@ eframe      = {version = "0.31.1", features = ["wgpu"] } # Updated eframe versio
 egui        = "0.31.1"
 egui_extras = {version = "0.31", features = ["image"] }
 image       = "0.25.6"   # PNG/JPEG loader
+rfd         = {version = "0.15", default-features = false, features = ["tokio"] }
 zed         = {path = "../zed"}
+rand = "0.9.1"

@@ -1,13 +1,14 @@
 use crate::app::rivvitium_app::RivvitiumApp;
-use crate::ui::visuals::colors::{apply_standard_colors, ACCENT, ACCENT_BORDER, TEXT_ON_ACCENT};
+use crate::ui::visuals::colors::{apply_color_theme, ACCENT, ACCENT_BORDER, TEXT_ON_ACCENT};
 use eframe::epaint::Stroke;
 use egui::{Button, RichText};
+use crate::ui::dialogs::file_dialog::choose_file_with_native_dialog;
 
 /// Draw a horizontal array of buttons and wire behavior
 ///
 pub fn draw_button_bar(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
     ui.horizontal(|ui| {
-        apply_standard_colors(ui);
+        apply_color_theme(ui, app.app_settings);
         draw_source_button(app, ui);
         draw_relays_button(app, ui);
         draw_destination_button(app, ui);
@@ -25,7 +26,7 @@ fn draw_source_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	let text    = RichText::new("Source");
 	let button  = Button::new(text);
 	if ui.add_enabled(enabled, button).clicked() {
-		app.app_state.capture_click();
+		choose_file_with_native_dialog(&mut app.app_state);
 	}	
 }	
 

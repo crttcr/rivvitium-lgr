@@ -8,6 +8,7 @@ use crate::ui::regions::header::draw_header;
 use crate::ui::dialogs;
 use crate::ui::menu::create_menu_bar;
 use std::fmt::Debug;
+use crate::ui::visuals::colors::ColorTheme;
 
 // This is the main application. It both drawing particulars
 // and state values
@@ -18,6 +19,7 @@ pub struct RivvitiumApp {
     pub image_about:    Option<egui::TextureHandle>,
     pub active_panel:   ActiveAction,
     pub app_state:      AppState,
+    pub app_settings:   ColorTheme,
 }
 
 impl RivvitiumApp {
@@ -31,9 +33,9 @@ impl RivvitiumApp {
         let img  = image::load_from_memory(bytes)
             .expect("valid png")
             .to_rgba8(); // 2. turn them into rgba pixels with the `image` crate:
-        let size = [img.width() as usize, img.height() as usize];
+        let size  = [img.width() as usize, img.height() as usize];
         let image = egui::ColorImage::from_rgba_premultiplied(size, &img); // 3. give the pixels to egui so it becomes a GPU texture:
-        let tex = ctx.load_texture("logo_texture", image, egui::TextureOptions::default());
+        let tex   = ctx.load_texture("logo_texture", image, egui::TextureOptions::default());
         self.image_about = Some(tex);
     }
 }
@@ -44,7 +46,8 @@ impl Default for RivvitiumApp {
 		let image_about     = None;
 		let active_panel    = ActiveAction::Home;
 		let app_state       = AppState::default();
-		RivvitiumApp{show_dialog, image_about, active_panel, app_state}
+		let app_settings    = ColorTheme::random();
+		RivvitiumApp{show_dialog, image_about, active_panel, app_state, app_settings}
 	}
 }
 
@@ -72,7 +75,6 @@ impl eframe::App for RivvitiumApp {
         egui::CentralPanel::default().show(ctx, |ui| {
 		      draw_header(ui);
             ui.add_space(10.0);
-            ui.separator();
             draw_button_bar(self, ui);
             match self.active_panel {
             	ActiveAction::Ready  => {draw_ready_panel(self, ui)}
