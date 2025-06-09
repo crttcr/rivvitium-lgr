@@ -30,7 +30,7 @@ impl RivvitiumApp {
         }
 
         let bytes = include_bytes!("../assets/riv.bars.png"); // 1. read the bytes that we embedded in the binary:
-        let img  = image::load_from_memory(bytes)
+        let img   = image::load_from_memory(bytes)
             .expect("valid png")
             .to_rgba8(); // 2. turn them into rgba pixels with the `image` crate:
         let size  = [img.width() as usize, img.height() as usize];
