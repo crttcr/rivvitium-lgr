@@ -5,7 +5,9 @@ pub mod footer;
 pub mod header;
 
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum ActiveAction {
+	#[default]
 	Home,
 	Ready,
 	Run,

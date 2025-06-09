@@ -59,7 +59,7 @@ fn inject_button_file_exit(ui: &mut egui::Ui, app: &mut RivvitiumApp) {
 fn draw_relay_menu(ui: &mut egui::Ui, state: &mut RivvitiumApp) {
     ui.menu_button("Relay", |ui| {
         if ui.button("Add a relay").clicked() {
-            state.show_dialog = true;
+            state.ui_state.show_about_dialog();
         };
         ui.label("Remove relay");
         ui.label("Clear all relays");
@@ -71,7 +71,7 @@ fn draw_relay_menu(ui: &mut egui::Ui, state: &mut RivvitiumApp) {
 fn draw_destination_menu(ui: &mut egui::Ui, state: &mut RivvitiumApp) {
     ui.menu_button("Destination", |ui| {
         if ui.button("Csv file").clicked() {
-            state.show_dialog = true;
+            state.ui_state.show_about_dialog();
         };
         ui.label("JSON array file");
         ui.label("JSON object file");
@@ -85,7 +85,11 @@ fn draw_destination_menu(ui: &mut egui::Ui, state: &mut RivvitiumApp) {
 fn draw_run_menu(ui: &mut egui::Ui, state: &mut RivvitiumApp) {
     ui.menu_button("Run", |ui| {
         if ui.button("Parse file").clicked() {
-            state.show_dialog = true;
+            if state.ui_state.is_about_dialog_visible() {
+                state.ui_state.hide_about_dialog();
+            } else {
+                state.ui_state.show_about_dialog();
+            }
         };
         ui.label("Parse file");
     });
@@ -97,15 +101,19 @@ fn draw_settings_menu(ui: &mut egui::Ui, state: &mut RivvitiumApp) {
     ui.menu_button("Settings", |ui| {
         if ui.button("Default").clicked() {
             state.app_settings = ColorTheme::default();
+            ui.close_menu(); // collapse the menu
         };
         if ui.button("Forest").clicked() {
             state.app_settings = ColorTheme::ForestCanopy;
+            ui.close_menu(); // collapse the menu
         };
         if ui.button("Ocean").clicked() {
             state.app_settings = ColorTheme::OceanBreeze;
+            ui.close_menu(); // collapse the menu
         };
         if ui.button("Sunset").clicked() {
             state.app_settings = ColorTheme::SunsetGlow;
+            ui.close_menu(); // collapse the menu
         };
     });
 }
@@ -117,7 +125,7 @@ fn draw_help_menu(ui: &mut egui::Ui, state: &mut RivvitiumApp) {
     ui.menu_button("Help", |ui| {
         ui.label("What's new in Rivvitium");
         if ui.button("About").clicked() {
-            state.show_dialog = true; // open the window next frame
+            state.ui_state.show_about_dialog();
             ui.close_menu(); // collapse the menu
         }
     });
