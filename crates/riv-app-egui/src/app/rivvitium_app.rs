@@ -1,20 +1,23 @@
 
-use std::fmt::Debug;
-use eframe::egui;
-use crate::ui::dialogs;
-use crate::ui::menu::draw_main_menu;
-use crate::ui::regions::action_panel::draw_action_panel;
+use apex::AppState;
+use crate::ui::regions::action_panel::{draw_action_panel, draw_ready_panel, draw_run_panel, draw_result_panel};
+use crate::ui::regions::ActiveAction;
 use crate::ui::regions::button_bar::draw_button_bar;
 use crate::ui::regions::footer::draw_footer;
 use crate::ui::regions::header::draw_header;
+use crate::ui::dialogs;
+use crate::ui::menu::create_menu_bar;
+use std::fmt::Debug;
 
 // This is the main application. It both drawing particulars
 // and state values
 //
 pub struct RivvitiumApp {
-    pub click_count:    u32,
+//    pub click_count:    u32,
     pub show_dialog:    bool,
     pub image_about:    Option<egui::TextureHandle>,
+    pub active_panel:   ActiveAction,
+    pub app_state:      AppState,
 }
 
 impl RivvitiumApp {
@@ -37,17 +40,18 @@ impl RivvitiumApp {
 
 impl Default for RivvitiumApp {
 	fn default() -> Self {
-		let click_count     = 0;
 		let show_dialog     = false;
 		let image_about     = None;
-		RivvitiumApp{click_count, show_dialog, image_about}
+		let active_panel    = ActiveAction::Home;
+		let app_state       = AppState::default();
+		RivvitiumApp{show_dialog, image_about, active_panel, app_state}
 	}
 }
 
 impl Debug for RivvitiumApp {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		f.debug_struct("ApplicationState")
-		.field("click_count", &self.click_count)
+		.field("click_count", &self.app_state.click_count())
 		.field("show_dialog", &self.show_dialog)
 		.finish()
 	}
@@ -61,7 +65,7 @@ impl eframe::App for RivvitiumApp {
         
         // Menu
         //
-        draw_main_menu(self, ctx);
+        create_menu_bar(self, ctx);
         
         // Draw
         //
@@ -70,7 +74,12 @@ impl eframe::App for RivvitiumApp {
             ui.add_space(10.0);
             ui.separator();
             draw_button_bar(self, ui);
-            draw_action_panel(self, ui);
+            match self.active_panel {
+            	ActiveAction::Ready  => {draw_ready_panel(self, ui)}
+            	ActiveAction::Run    => {draw_run_panel(self, ui)}
+            	ActiveAction::Result => {draw_result_panel(self, ui)}
+            	_                    => {draw_action_panel(self, ui)}
+            }
 		      draw_footer(ui);
 		      ui.add_space(10.0);
         });

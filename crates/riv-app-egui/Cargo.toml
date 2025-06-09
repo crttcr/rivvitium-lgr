@@ -4,7 +4,9 @@ version     = "0.1.0"
 edition     = "2024"
 
 [dependencies]
+apex        = {path = "../apex"}
 eframe      = {version = "0.31.1", features = ["wgpu"] } # Updated eframe version to 0.31.1
 egui        = "0.31.1"
 egui_extras = {version = "0.31", features = ["image"] }
 image       = "0.25.6"   # PNG/JPEG loader
+zed         = {path = "../zed"}

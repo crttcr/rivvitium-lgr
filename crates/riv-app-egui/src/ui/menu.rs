@@ -2,7 +2,7 @@
 use crate::app::rivvitium_app::RivvitiumApp;
 
 // ------------------------  menu bar  ------------------------------
-pub fn draw_main_menu(state: &mut RivvitiumApp, ctx: &egui::Context) {
+pub fn create_menu_bar(state: &mut RivvitiumApp, ctx: &egui::Context) {
     egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
         egui::menu::bar(ui, |ui| {
             draw_file_menu(ui, state);
