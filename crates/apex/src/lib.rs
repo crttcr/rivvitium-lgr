@@ -1,3 +1,7 @@
+pub mod state;
+
+pub use state::app_state::AppState;
+
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
 }

@@ -14,5 +14,5 @@ pub type Result<T> = std::result::Result<T, Error>; // Common type alias
 pub const AUXBOX: &str = "auxbox";
 
 pub fn data_file_path_as_str(file: &str) -> String {
-	format!("{}/data/{}", AUXBOX, file)
+	format!("../../{}/data/{}", AUXBOX, file)
 }

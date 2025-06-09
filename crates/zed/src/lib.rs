@@ -1,3 +1,4 @@
+pub mod util;
 pub mod test_tools;
 
 pub fn add(left: u64, right: u64) -> u64 {
