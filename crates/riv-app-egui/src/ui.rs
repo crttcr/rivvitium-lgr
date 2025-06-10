@@ -1,5 +1,6 @@
 
 pub mod dialogs;
+pub mod helpers;
 pub mod menu;
 pub mod regions;
 pub mod widgets;
@@ -20,7 +21,7 @@ pub fn standard_button_width() -> f32 { 120.0 }
 #[derive(Clone, PartialEq, Eq)]
 pub struct UiState {
     active_panel: ActiveAction,
-    pub about_dialog_visible: bool,  /// 
+    pub about_dialog_visible: bool,  ///
     about_dialog_texture: Option<TextureHandle>,
 }
 

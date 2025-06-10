@@ -1,11 +1,13 @@
 use crate::app::rivvitium_app::RivvitiumApp;
 use eframe::emath::Align;
 use egui::Layout;
+use crate::app::parse_detail_dto::{ParseDetailDTO, ParseStatus};
 use crate::ui::regions::ActiveAction;
 
 pub fn draw_main_panel(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	match app.ui_state.active_panel() {
 		ActiveAction::DataFileOnly        => {draw_ready_panel(app, ui)} 
+		ActiveAction::ParseInProgress     => {draw_parse_detail_panel(app, ui)} 
 		ActiveAction::DataFileWithRelays  => {draw_run_panel(   app, ui)}
 		ActiveAction::CompletePipeline    => {draw_result_panel(app, ui)}
 		ActiveAction::PostPublication     => {draw_post_publication_panel(app, ui)}
@@ -25,6 +27,17 @@ fn draw_no_datafile_panel(_app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 		ui.heading(head);
 		ui.label(label);
 	});
+}
+
+fn draw_parse_detail_panel(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
+	let file = if app.app_state.has_selected_file() {
+	"some selected file"
+	} else {
+	"no selected file"
+	};
+	
+	let dto = ParseDetailDTO::new(file).with_parse_status(ParseStatus::InProgress);
+	dto.show(ui);
 }
 
 fn draw_ready_panel(app: &mut RivvitiumApp, ui: &mut egui::Ui) {

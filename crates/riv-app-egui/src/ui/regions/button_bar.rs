@@ -3,12 +3,13 @@ use crate::ui::visuals::colors::{apply_color_theme, ACCENT, ACCENT_BORDER, TEXT_
 use eframe::epaint::Stroke;
 use egui::{Button, RichText};
 use crate::ui::dialogs::file_dialog::choose_file_with_native_dialog;
+use crate::ui::regions::ActiveAction;
 
 /// Draw a horizontal array of buttons and wire behavior
 ///
-/// Note, there are 2 sets of buttons. The first set configures the 
+/// Note, there are 2 sets of buttons. The first set configures the
 /// pipeline and the second set performs data operations
-/// 
+///
 pub fn draw_button_bar(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
     ui.horizontal(|ui| {
         apply_color_theme(ui, app.app_settings);
@@ -34,8 +35,8 @@ fn draw_source_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	let button  = Button::new(text);
 	if ui.add_enabled(enabled, button).clicked() {
 		choose_file_with_native_dialog(&mut app.app_state, &mut app.ui_state);
-	}	
-}	
+	}
+}
 
 fn draw_relays_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	let enabled = true;
@@ -43,8 +44,8 @@ fn draw_relays_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	let button  = Button::new(text);
 	if ui.add_enabled(enabled, button).clicked() {
 		app.app_state.capture_click();
-	}	
-}	
+	}
+}
 
 fn draw_destination_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	let enabled = true;
@@ -52,8 +53,8 @@ fn draw_destination_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	let button  = Button::new(text);
 	if ui.add_enabled(enabled, button).clicked() {
 		app.app_state.capture_click();
-	}	
-}	
+	}
+}
 
 //
 // Action buttons
@@ -68,8 +69,9 @@ fn draw_parse_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 		.stroke(stroke);
 	if ui.add_enabled(enabled, button).clicked() {
 		app.app_state.capture_click();
-	}	
-}	
+		app.ui_state.set_active_panel(ActiveAction::ParseInProgress);
+	}
+}
 
 fn draw_analyze_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	let enabled = app.app_state.has_selected_relays();
@@ -80,8 +82,8 @@ fn draw_analyze_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 		.stroke(stroke);
 	if ui.add_enabled(enabled, button).clicked() {
 		app.app_state.capture_click();
-	}	
-}	
+	}
+}
 
 fn draw_blueprint_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	let enabled = app.app_state.has_selected_file();
@@ -92,8 +94,8 @@ fn draw_blueprint_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 		.stroke(stroke);
 	if ui.add_enabled(enabled, button).clicked() {
 		app.app_state.capture_click();
-	}	
-}	
+	}
+}
 
 fn draw_publish_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	let enabled = app.app_state.has_selected_destination();
@@ -104,5 +106,5 @@ fn draw_publish_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 		.stroke(stroke);
 	if ui.add_enabled(enabled, button).clicked() {
 		app.app_state.capture_click();
-	}	
-}	
+	}
+}
