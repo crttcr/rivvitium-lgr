@@ -62,13 +62,20 @@ impl eframe::App for RivvitiumApp {
         
         // Draw
         //
+			// ───────────────────── header ──────────────────────
+		egui::TopBottomPanel::top("header").show(ctx, |ui| {
+			draw_header(ui);
+		});
+
+			// ───────────────────── footer ──────────────────────
+			egui::TopBottomPanel::bottom("footer").show(ctx, |ui| {
+		      draw_footer(ui);
+	    });        
+			// ───────────────────── main content ────────────────
         egui::CentralPanel::default().show(ctx, |ui| {
-		      draw_header(ui);
             ui.add_space(10.0);
             draw_button_bar(self, ui);
             draw_main_panel(self, ui);
-            
-		      draw_footer(ui);
 		      ui.add_space(10.0);
         });
 

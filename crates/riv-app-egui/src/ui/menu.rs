@@ -33,7 +33,8 @@ fn inject_button_file_open(ui: &mut egui::Ui, app: &mut RivvitiumApp) {
 	let text    = RichText::new("Open ...");
 	let button  = Button::new(text);
 	if ui.add_enabled(enabled, button).clicked() {
-		choose_file_with_native_dialog(&mut app.app_state);
+		choose_file_with_native_dialog(&mut app.app_state, &mut app.ui_state);
+      ui.close_menu(); // collapse the menu
 	}
 }
 
@@ -42,7 +43,8 @@ fn inject_button_file_close(ui: &mut egui::Ui, app: &mut RivvitiumApp) {
 	let text    = RichText::new("Close");
 	let button  = Button::new(text);
 	if ui.add_enabled(enabled, button).clicked() {
-		app.app_state.close_file()
+		app.app_state.close_file();
+      ui.close_menu(); // collapse the menu
 	}
 }
 

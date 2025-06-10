@@ -8,8 +8,9 @@ pub mod header;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum ActiveAction {
 	#[default]
-	Home,
-	Ready,
-	Run,
-	Result,
+	NoDataFile,
+	DataFileOnly,
+	DataFileWithRelays,
+	CompletePipeline,
+	PostPublication,
 }
