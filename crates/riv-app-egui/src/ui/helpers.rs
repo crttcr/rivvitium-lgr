@@ -5,9 +5,8 @@ use apex::state::parse_detail_dto::ParseStatus;
 
 pub const ROW_HEIGHT: f32 = 20.0;
 
-fn right_label(ui: &mut egui::Ui, txt: impl Into<String>) {
-    use egui::{Align, Layout, RichText};
-
+pub fn right_label(ui: &mut egui::Ui, txt: impl Into<String>) {
+    use egui::{Align, Layout};
     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
         ui.label(RichText::new(txt).monospace());
     });
