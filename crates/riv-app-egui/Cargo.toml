@@ -13,5 +13,5 @@ num-format  = "0.4"
 rfd         = {version = "0.15", default-features = false, features = ["tokio"] }
 riv         = {path = "../riv"}
 tracing     = "0.1"
-zed         = {path = "../zed"}
+zero        = {path = "../zero"}
 rand = "0.9.1"

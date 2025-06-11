@@ -223,10 +223,11 @@ checksum = "e16d2d3311acee920a9eb8d33b8cbc1787ce4a264e85f964c2404b969bdcd487"
 name = "apex"
 version = "0.1.0"
 dependencies = [
+ "num-format",
  "riv",
  "tracing",
  "tracing-subscriber",
- "zed",
+ "zero",
 ]
 
 [[package]]
@@ -991,7 +992,7 @@ dependencies = [
  "anyhow",
  "apex",
  "riv",
- "zed",
+ "zero",
 ]
 
 [[package]]
@@ -2556,7 +2557,7 @@ dependencies = [
  "riv",
  "slint",
  "slint-build",
- "zed",
+ "zero",
 ]
 
 [[package]]
@@ -3794,6 +3795,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "num-format"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a652d9771a63711fd3c3deb670acfbe5c30a4072e664d7a3bf5a9e1056ac72c3"
+dependencies = [
+ "arrayvec",
+ "itoa",
+]
+
+[[package]]
 name = "num-integer"
 version = "0.1.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4973,7 +4984,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "ulid",
- "zed",
+ "zero",
 ]
 
 [[package]]
@@ -4985,9 +4996,12 @@ dependencies = [
  "egui",
  "egui_extras",
  "image",
+ "num-format",
  "rand 0.9.1",
  "rfd",
- "zed",
+ "riv",
+ "tracing",
+ "zero",
 ]
 
 [[package]]
@@ -4997,7 +5011,7 @@ dependencies = [
  "riv",
  "slint",
  "slint-build",
- "zed",
+ "zero",
 ]
 
 [[package]]
@@ -7468,7 +7482,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "zed"
+name = "zero"
 version = "0.1.0"
 
 [[package]]

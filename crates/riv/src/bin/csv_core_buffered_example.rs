@@ -2,7 +2,7 @@ use csv_core::{ReaderBuilder, ReadRecordResult};
 use std::fs::File;
 use std::{io, io::Read};
 
-const DATA_PATH:  &str  = "/Users/reid/Coding/Rust/LGR/rivvitium-lgr/auxbox/data/";
+const DATA_PATH:  &str  = "/Users/reid/Coding/Rust/LGR/riv-lgr/auxbox/data/";
 const DATA_FILE:  &str  = "weather_stations.csv";
 const CHUNK_SIZE: usize = 4 * 1024;     // read file in 4 KiB chunks
 const OUT_SIZE:   usize = 8 * 1024;     // unescaped record buffer

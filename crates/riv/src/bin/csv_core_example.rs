@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::Read;
 use csv_core::{ReaderBuilder, ReadRecordResult};
 
-const DATA_PATH: &str = "/Users/reid/Coding/Rust/LGR/rivvitium-lgr/auxbox/data/";
+const DATA_PATH: &str = "/Users/reid/Coding/Rust/LGR/riv-lgr/auxbox/data/";
 
 fn main() -> std::io::Result<()> {
 

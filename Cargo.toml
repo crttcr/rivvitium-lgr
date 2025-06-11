@@ -7,7 +7,7 @@ members = [
    "crates/riv", 
    "crates/riv-app-egui", 
    "crates/riv-app-slint",
-   "crates/zed",
+   "crates/zero",
 ]
 
 resolver = "3"

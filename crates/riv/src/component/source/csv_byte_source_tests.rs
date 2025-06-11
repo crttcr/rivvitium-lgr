@@ -1,6 +1,6 @@
 use std::fs::File;
 use tempfile::NamedTempFile;
-use zed::test_tools::failing_reader::FailingReader;
+use zero::test_tools::failing_reader::FailingReader;
 use crate::component::source::csv_byte_source::CsvByteSource;
 use crate::component::source::{Source, SourceState};
 use crate::Error;

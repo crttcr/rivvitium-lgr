@@ -33,7 +33,7 @@ jsrmx --help
 The Rivvitium application is GUI based so simply launch the executable.
 
 ```sh
-rivvitium [input]
+riv [input]
 ```
 Once running, the choices should be self explanatory:
 

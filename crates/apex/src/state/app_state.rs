@@ -1,11 +1,23 @@
 
 use tracing::{info, instrument, warn};
-use zed::util::file_utils::assert_readable;
+use zero::util::file_utils::assert_readable;
 use std::path::PathBuf;
+use crate::state::parse_detail_dto::ParseDetailDTO;
 
 pub struct AppState {
-	click_count:   u32,
-	selected_file: Option<PathBuf>,   // ① store the path
+	click_count:       u32,
+	selected_file:     Option<PathBuf>,   // ① store the path
+	parse_detail:      Option<ParseDetailDTO>, 
+}
+
+
+impl Default for AppState {
+	fn default() -> Self {
+		let click_count   = 0;
+		let selected_file = None;
+		let parse_detail  = None;
+		Self{click_count, selected_file, parse_detail}
+	}
 }
 
 impl AppState {
@@ -31,6 +43,22 @@ impl AppState {
 				  warn!("⚠ Bad file. Not updating source: {}: {}", selected_file.display(), e);
 			}
 		 }
+	}
+	
+	pub fn with_dto(&mut self, dto: ParseDetailDTO) -> () {
+		self.parse_detail.replace(dto);
+	}
+	
+	pub fn get_parse_detail(&self) -> Option<&ParseDetailDTO> {
+		self.parse_detail.as_ref()
+	}
+	
+	pub fn get_selected_file(&self) -> Option<&PathBuf> {
+		self.selected_file.as_ref()
+	}
+	
+	pub fn get_selected_file_mut(&mut self) -> Option<&mut PathBuf> {
+		self.selected_file.as_mut()
 	}
 	
 	#[instrument(skip(self))]	
@@ -66,16 +94,10 @@ impl AppState {
 	
 	// Predicates
 	//
-	pub fn has_selected_file(&self) -> bool { self.selected_file.is_some() }
-	pub fn can_run_pipeline(&self)  -> bool { self.has_selected_file()     }
-}
-
-impl Default for AppState {
-	fn default() -> Self {
-		let click_count   = 0;
-		let selected_file = None;
-		Self{click_count, selected_file}
-	}
+	pub fn has_selected_file(&self)        -> bool { self.selected_file.is_some() }
+	pub fn has_selected_relays(&self)      -> bool { false                        }
+	pub fn has_selected_destination(&self) -> bool { false                        }
+	pub fn can_run_pipeline(&self)         -> bool { self.has_selected_file()     }
 }
 
 /*
