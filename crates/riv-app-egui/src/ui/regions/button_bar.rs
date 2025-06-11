@@ -52,6 +52,8 @@ fn draw_destination_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	let text    = RichText::new("Destination");
 	let button  = Button::new(text);
 	if ui.add_enabled(enabled, button).clicked() {
+		println!("Destination button clicked");
+		app.ui_state.set_sink_dialog_visible();
 		app.app_state.capture_click();
 	}
 }

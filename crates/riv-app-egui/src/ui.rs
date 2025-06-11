@@ -10,6 +10,7 @@ pub mod visuals;
 use egui::TextureHandle;
 use crate::ui::regions::ActiveAction;
 use std::fmt;
+use apex::state::sink_config::SinkConfig;
 
 #[inline]
 #[allow(dead_code)]
@@ -17,19 +18,29 @@ pub fn standard_button_width() -> f32 { 120.0 }
 
 
 /// UI-level state that lives alongside `AppState` / model state.
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq)]
 pub struct UiState {
     active_panel: ActiveAction,
-    pub about_dialog_visible: bool,  ///
+	pub about_dialog_visible: bool,  ///
+	sink_dialog_visible: bool,  ///
+	pub sink_config: SinkConfig,  ///
     about_dialog_texture: Option<TextureHandle>,
 }
 
 impl Default for UiState {
     fn default() -> Self {
-		let active_panel         = ActiveAction::default();
-		let about_dialog_visible = false;
-		let about_dialog_texture = None;
-		Self {active_panel, about_dialog_visible, about_dialog_texture}
+		let active_panel            = ActiveAction::default();
+		let about_dialog_visible    = false;
+		let sink_dialog_visible     = false;
+		let about_dialog_texture    = None;
+		let sink_config             = SinkConfig::default();
+		Self {
+			active_panel, 
+			about_dialog_visible, 
+			sink_dialog_visible,
+			sink_config, 
+			about_dialog_texture
+			}
 	}
 }
 
@@ -55,6 +66,26 @@ impl UiState {
     #[inline]
     pub fn set_active_panel(&mut self, panel: ActiveAction) {
         self.active_panel = panel;
+    }
+
+    /* ──────── about_dialog_visible ────────── */
+
+    #[inline]
+    pub fn is_sink_dialog_visible(&self) -> bool {
+        self.sink_dialog_visible
+    }
+
+    #[inline]
+    pub fn set_sink_dialog_invisible(&mut self) {
+    	println!("set_sink_dialog_invisible");
+        self.sink_dialog_visible = false;
+    }
+
+    #[inline]
+    pub fn set_sink_dialog_visible(&mut self) {
+    	println!("set_sink_dialog_visible");
+        self.sink_dialog_visible = true;
+    	println!("sink_dialog_visible: {}", self.sink_dialog_visible);
     }
 
     /* ──────── about_dialog_visible ────────── */
