@@ -15,7 +15,6 @@ use tracing::{info, warn};
 use apex::engines::riv::riv_parser::RivParser;
 use apex::state::parse_detail_dto::ParseDetailDTO;
 use riv::model::ir::atom::Atom;
-use crate::ui::dialogs::sink_dialog::SinkDialog;
 
 // This is the main application. It both drawing particulars
 // and state values
@@ -121,11 +120,8 @@ impl eframe::App for RivvitiumApp {
         //
         create_menu_bar(self, ctx);
 
-// FIXME: This is goofed creating a new dialog ...
 			if self.ui_state.is_sink_dialog_visible() {
-				let mut dialog = SinkDialog::default();
-				dialog.open = true;
-        		if let Some(cfg) = dialog.show(ctx) {
+        		if let Some(cfg) = self.ui_state.sink_dialog.show(ctx) {
             	println!("Sink chosen: {cfg:?}");
         			self.app_state.set_sink_config(cfg);
         			self.ui_state.set_sink_dialog_invisible();

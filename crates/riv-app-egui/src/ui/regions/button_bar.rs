@@ -102,7 +102,7 @@ fn draw_blueprint_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 }
 
 fn draw_publish_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
-	let enabled = app.app_state.has_selected_destination();
+	let enabled = app.app_state.sink_permits_publish();
 	let text    = RichText::new("Publish").color(TEXT_ON_ACCENT).strong();
 	let stroke  = Stroke::new(1.0, ACCENT_BORDER);
 	let button  = Button::new(text)

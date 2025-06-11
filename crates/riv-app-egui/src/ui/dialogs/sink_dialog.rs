@@ -14,6 +14,8 @@ pub struct SinkDialog {
     file_path:  String,
     delimiter:  String,
     pretty:     bool,
+    server:     String,
+    port:       String,
     table:      String,
 }
 
@@ -26,6 +28,8 @@ impl Default for SinkDialog {
             file_path: String::new(),
             delimiter,
             pretty:    true,
+            server:    "localhost".into(),
+            port:      "9092".into(),       
             table:     "data".into(),
         }
     }
@@ -64,21 +68,35 @@ impl SinkDialog {
         ui.vertical(|ui| {
             /* --- sink kind ------------------------------------------------ */
 
-            ui.label("Sink kind:");
+            ui.label("Choose the type of destination:");
             ui.horizontal(|ui| {
                 ui.radio_value(&mut self.kind, SinkKind::Capture, "Capture");
                 ui.radio_value(&mut self.kind, SinkKind::Console, "Console");
                 ui.radio_value(&mut self.kind, SinkKind::Csv,     "CSV");
                 ui.radio_value(&mut self.kind, SinkKind::Json,    "JSON");
+                ui.radio_value(&mut self.kind, SinkKind::Kafka,   "Kafka");
                 ui.radio_value(&mut self.kind, SinkKind::Sqlite,  "SQLite");
                 ui.radio_value(&mut self.kind, SinkKind::DevNull, "DevNull");
             });
-
             ui.add_space(8.0);
 
             /* --- per-kind configuration ----------------------------------- */
 
             match self.kind {
+					SinkKind::Kafka => {
+					 ui.horizontal(|ui| {
+					  ui.label("Server:");
+					  ui.text_edit_singleline(&mut self.server);
+					 });
+					 ui.horizontal(|ui| {
+					  ui.label("Port:");
+					  ui.add(
+					  TextEdit::singleline(&mut self.port)
+						.char_limit(5)
+		            .desired_width(60.0),
+					  )
+    				});
+					},
                 SinkKind::Csv | SinkKind::Json | SinkKind::Sqlite => {
                     ui.label("Output path:");
                     self.path_edit_row(ui);
@@ -149,8 +167,10 @@ if matches!(self.kind, SinkKind::Csv) {
     /* --- helper: can we enable OK? -------------------------------------- */
     fn ok_button_enabled(&self) -> bool {
         match self.kind {
-            SinkKind::Capture | SinkKind::Console | SinkKind::DevNull => true,
             SinkKind::Csv | SinkKind::Json | SinkKind::Sqlite => !self.file_path.trim().is_empty(),
+            SinkKind::Kafka => !self.server.trim().is_empty() && self.port.parse::<u16>().is_ok(),           
+            SinkKind::Capture | SinkKind::Console | SinkKind::DevNull => true,
+
         }
     }
 
@@ -168,6 +188,10 @@ if matches!(self.kind, SinkKind::Csv) {
                 self.file_path.clone(),
                 self.pretty,
             ),
+	        SinkKind::Kafka => SinkConfig::kafka(
+	            self.server.clone(),
+	            self.port.parse::<u16>().unwrap_or(9092),
+	        ),            
             SinkKind::Sqlite    => SinkConfig::sqlite(
                 self.file_path.clone(),
                 self.table.clone(),
