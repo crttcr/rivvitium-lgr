@@ -2,7 +2,7 @@
 
 use crate::model::ir::atom::Atom;
 use crate::error::Error;
-use crate::component::sink::Sink;
+use crate::component::sink::{Sink, SinkKind};
 
 use std::fmt::{Debug, Display};
 use tracing::{info, instrument};
@@ -23,6 +23,8 @@ impl CaptureSink {
 }
 
 impl Sink<Vec<Atom>> for CaptureSink {
+	fn kind(&self) -> SinkKind { SinkKind::Capture }
+        
 	#[instrument]
 	fn initialize<C: Display + Debug>(&mut self, _cfg: &C) -> Result<(), Error> {
 		self.atoms.clear();

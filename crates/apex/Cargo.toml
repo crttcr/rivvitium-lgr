@@ -9,3 +9,4 @@ riv                = {path = "../riv"}
 tracing            = "0.1"
 tracing-subscriber = {version = "0.3", features = ["fmt", "env-filter"] }
 zero               = {path = "../zero"}
+thiserror = "2.0.12"

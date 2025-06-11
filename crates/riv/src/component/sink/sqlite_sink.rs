@@ -2,7 +2,7 @@ use std::{fmt::Debug, path::Path};
 use rusqlite::{params_from_iter, Connection, Error as RusqliteError};
 use crate::error::{Error, IoErrorWrapper};
 use tracing::instrument;
-use crate::component::sink::Sink;
+use crate::component::sink::{Sink, SinkKind};
 use crate::model::ir::atom::Atom;
 use crate::model::ir::atom_type::AtomType;
 
@@ -33,6 +33,8 @@ impl SqliteSink {
 }
 
 impl Sink<()> for SqliteSink {
+	fn kind(&self) -> SinkKind { SinkKind::Sqlite }
+
 //    #[instrument]
     fn initialize<C: Debug + std::fmt::Display>(&mut self, _cfg: &C) -> Result<(), Error> {
         // 1) Open (or create) the SQLite database file

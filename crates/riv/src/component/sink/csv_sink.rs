@@ -1,6 +1,6 @@
 use crate::error::{Error, IoErrorWrapper};
 use crate::model::ir::atom::Atom;
-use crate::component::sink::Sink;
+use crate::component::sink::{Sink, SinkKind};
 use std::fmt::{Debug, Display};
 use std::fs::File;
 use std::io::{BufWriter, Write};
@@ -24,6 +24,8 @@ impl CsvSink {
 }
 
 impl Sink<()> for CsvSink {
+	fn kind(&self) -> SinkKind { SinkKind::Csv }
+	
 	#[instrument]
 	fn initialize<C: Display + Debug>(&mut self, _cfg: &C) -> Result<(), Error> {
 		let full_path = Path::new(OUTPUT_PATH).join(&self.output_file_name);             // 1) Build the full path: "/tmp/<output_file_name>"

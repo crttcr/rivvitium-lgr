@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Display};
 use tracing::{info, instrument};
-use crate::component::sink::Sink;
+use crate::component::sink::{Sink, SinkKind};
 use crate::error::Error;
 use crate::model::ir::atom::Atom;
 
@@ -16,6 +16,8 @@ impl ConsoleSink {
 
 impl Sink<u64> for ConsoleSink
 {
+	fn kind(&self) -> SinkKind { SinkKind::Console }
+	
 	#[instrument(level = "debug", skip_all)]
 	fn initialize<C: Display + Debug>(&mut self, cfg: &C) -> Result<(), Error> {
 		let msg = format!("[ConsoleSink ]: Initializing {}. TODO: Actually use configuration", cfg);

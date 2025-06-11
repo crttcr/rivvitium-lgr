@@ -225,6 +225,7 @@ version = "0.1.0"
 dependencies = [
  "num-format",
  "riv",
+ "thiserror 2.0.12",
  "tracing",
  "tracing-subscriber",
  "zero",

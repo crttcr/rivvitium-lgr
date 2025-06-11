@@ -1,5 +1,6 @@
 
 pub mod riv_parser;
+mod parse_helper;
 
 /// Messages that the UI layer can send to the background worker.
 /// 

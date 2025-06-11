@@ -2,27 +2,28 @@
 use tracing::{info, instrument, warn};
 use zero::util::file_utils::assert_readable;
 use std::path::PathBuf;
+use riv::component::sink::SinkKind;
 use crate::state::parse_detail_dto::ParseDetailDTO;
+use crate::state::sink_config::SinkConfig;
 
 pub struct AppState {
 	click_count:       u32,
 	selected_file:     Option<PathBuf>,   // ① store the path
 	parse_detail:      Option<ParseDetailDTO>, 
+	sink_config:       SinkConfig,
 }
-
 
 impl Default for AppState {
 	fn default() -> Self {
 		let click_count   = 0;
 		let selected_file = None;
 		let parse_detail  = None;
-		Self{click_count, selected_file, parse_detail}
+		let sink_config   = SinkConfig::default();
+		Self{click_count, selected_file, parse_detail, sink_config}
 	}
 }
 
 impl AppState {
-	// Functional mutation
-	//
 	pub fn with_source(self, selected_file: PathBuf) -> Self {
 		match assert_readable(&selected_file) { 
 			Ok(_)  => Self {selected_file : Some(selected_file),..self},
@@ -49,6 +50,21 @@ impl AppState {
 		self.parse_detail.replace(dto);
 	}
 	
+	pub fn set_sink_config(&mut self, cfg: SinkConfig) -> () {
+		self.sink_config = cfg;
+	}
+		
+	pub fn get_sink_config(&self) -> SinkConfig {
+		self.sink_config.clone()
+	}
+	
+	pub fn get_sink_config_mut(&mut self) -> &mut SinkConfig {
+		&mut self.sink_config
+	}
+	
+	pub fn get_parse_detail_mut(&mut self) -> &mut Option<ParseDetailDTO> {
+		&mut self.parse_detail
+	}
 	pub fn get_parse_detail(&self) -> Option<&ParseDetailDTO> {
 		self.parse_detail.as_ref()
 	}
@@ -96,8 +112,16 @@ impl AppState {
 	//
 	pub fn has_selected_file(&self)        -> bool { self.selected_file.is_some() }
 	pub fn has_selected_relays(&self)      -> bool { false                        }
-	pub fn has_selected_destination(&self) -> bool { false                        }
 	pub fn can_run_pipeline(&self)         -> bool { self.has_selected_file()     }
+	pub fn sink_permits_publish(&self)     -> bool { 
+		match self.sink_config.kind() {
+			SinkKind::Csv    => true,
+			SinkKind::Json   => true,
+			SinkKind::Kafka  => true,
+			SinkKind::Sqlite => true,
+			_ => false,
+		}
+	}
 }
 
 /*

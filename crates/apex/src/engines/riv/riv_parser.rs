@@ -1,15 +1,15 @@
-use std::fs::File;
-use std::io::{self, BufRead, BufReader};
+use std::io;
 use std::path::PathBuf;
 use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
 use std::time::Instant;
-
+use tracing::info;
 use riv::model::ir::atom::Atom;
+use crate::engines::riv::parse_helper::open_source;
 use crate::engines::riv::RivCommand;
 
 /// Background parser: owns the command receiver and publishes parsed `Atom`s.
-pub struct RivParser 
+pub struct RivParser
 {
     cmd_rx:  Receiver<RivCommand>,
     atom_tx: Sender<Atom>,
@@ -65,42 +65,21 @@ impl RivParser {
 
     fn handle_parse(&self, file: PathBuf) -> io::Result<()> {
         let started    = Instant::now();
-        let f          = File::open(&file)?;
-        let mut reader = BufReader::new(f);
-
-        // example: read file line-by-line and convert to Atoms
-        let mut line = String::new();
-        while reader.read_line(&mut line)? != 0 {
-            // business-specific: turn the string into your IR
-            if let Some(atom) = line_to_atom(&line) {
-                // failure to send means UI side went away → give up
-                if self.atom_tx.send(atom).is_err() {
-                    break;
-                }
-            }
-            line.clear();
+        info!("Parse started: {:?}", started.elapsed());
+        let mut source = open_source(&file).map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+        
+			info!("Start pulling atoms from source");
+        for atom in &mut source {
+        	match self.atom_tx.send(atom) {
+        	Ok(_) => {},
+        		Err(_) => {
+        			info!("Failed to send atom to UI");
+        			break;
+        		}
+        	}
         }
-
-        let elapsed = started.elapsed();
-        eprintln!(
-            "[RivParser] parsed {:?} in {:.2?}",
-            file.file_name().unwrap_or_default(),
-            elapsed
-        );
+        let ended = started.elapsed();
+        info!("Parse ended: {:?}", ended);
         Ok(())
-    }
-}
-
-/* ───────── helpers / stubs ────────────────────────────────────────── */
-
-/// Very small example IR conversion.
-/// FIXME: Replace this with real parsing logic.
-/// 
-fn line_to_atom(line: &str) -> Option<Atom> {
-    if line.trim().is_empty() {
-        None
-    } else {
-    	let atom = Atom::EndTask;
-        Some(atom)
     }
 }
