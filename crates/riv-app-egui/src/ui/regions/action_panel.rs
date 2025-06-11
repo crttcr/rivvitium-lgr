@@ -1,13 +1,15 @@
 use crate::app::rivvitium_app::RivvitiumApp;
 use eframe::emath::Align;
 use egui::Layout;
-use crate::app::parse_detail_dto::{ParseDetailDTO, ParseStatus};
+use apex::state::parse_detail_dto::{ParseDetailDTO, ParseStatus};
 use crate::ui::regions::ActiveAction;
+use crate::ui::views::parse_detail_view;
 
 pub fn draw_main_panel(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	match app.ui_state.active_panel() {
-		ActiveAction::DataFileOnly        => {draw_ready_panel(app, ui)} 
-		ActiveAction::ParseInProgress     => {draw_parse_detail_panel(app, ui)} 
+		ActiveAction::DataFileOnly        => {draw_ready_panel(app, ui)}
+		ActiveAction::ParseInProgress     => {draw_parse_detail_panel(app, ui)}
+		ActiveAction::ParseComplete       => {draw_parse_detail_panel(app, ui)}
 		ActiveAction::DataFileWithRelays  => {draw_run_panel(   app, ui)}
 		ActiveAction::CompletePipeline    => {draw_result_panel(app, ui)}
 		ActiveAction::PostPublication     => {draw_post_publication_panel(app, ui)}
@@ -30,14 +32,15 @@ fn draw_no_datafile_panel(_app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 }
 
 fn draw_parse_detail_panel(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
-	let file = if app.app_state.has_selected_file() {
-	"some selected file"
-	} else {
-	"no selected file"
-	};
-	
-	let dto = ParseDetailDTO::new(file).with_parse_status(ParseStatus::InProgress);
-	dto.show(ui);
+	match app.app_state.get_parse_detail() { 
+		Some(dto) => {
+			parse_detail_view::show_parse_detail(ui, dto);
+		},
+		None      => {
+			let dto = ParseDetailDTO::new("bogus_file_no_parse_detail").with_parse_status(ParseStatus::Error);
+			parse_detail_view::show_parse_detail(ui, &dto);
+		},
+	}
 }
 
 fn draw_ready_panel(app: &mut RivvitiumApp, ui: &mut egui::Ui) {

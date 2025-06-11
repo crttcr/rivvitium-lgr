@@ -61,15 +61,17 @@ fn draw_destination_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 //
 
 fn draw_parse_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
-	let enabled = app.app_state.has_selected_file();
 	let text    = RichText::new("Parse").color(TEXT_ON_ACCENT).strong();
 	let stroke  = Stroke::new(1.0, ACCENT_BORDER);
 	let button  = Button::new(text)
 		.fill(ACCENT)
 		.stroke(stroke);
-	if ui.add_enabled(enabled, button).clicked() {
-		app.app_state.capture_click();
-		app.ui_state.set_active_panel(ActiveAction::ParseInProgress);
+	if app.app_state.has_selected_file() {
+			if ui.add_enabled(true, button).clicked() {
+				app.fire_parse_command();
+			}
+	}	else {
+			if ui.add_enabled(false, button).clicked() {}
 	}
 }
 
@@ -105,6 +107,6 @@ fn draw_publish_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 		.fill(ACCENT)
 		.stroke(stroke);
 	if ui.add_enabled(enabled, button).clicked() {
-		app.app_state.capture_click();
+		app.ui_state.active_panel = ActiveAction::PostPublication;
 	}
 }

@@ -1,7 +1,7 @@
 
 use eframe::epaint::Color32;
 use egui::RichText;
-use crate::app::parse_detail_dto::ParseStatus;
+use apex::state::parse_detail_dto::ParseStatus;
 
 pub const ROW_HEIGHT: f32 = 20.0;
 

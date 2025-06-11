@@ -86,14 +86,14 @@ fn draw_destination_menu(ui: &mut egui::Ui, state: &mut RivvitiumApp) {
 //
 fn draw_run_menu(ui: &mut egui::Ui, state: &mut RivvitiumApp) {
     ui.menu_button("Run", |ui| {
-        if ui.button("Parse file").clicked() {
-            if state.ui_state.is_about_dialog_visible() {
-                state.ui_state.hide_about_dialog();
-            } else {
-                state.ui_state.show_about_dialog();
-            }
-        };
-        ui.label("Parse file");
+			let enabled = state.app_state.has_selected_file();
+			let text    = RichText::new("Parse selected file");
+			let button  = Button::new(text);
+			if ui.add_enabled(enabled, button).clicked() {
+				state.fire_parse_command();
+			}
+        if ui.button("Add action 2").clicked() {};
+        if ui.button("Add action 3").clicked() {};
     });
 }
 

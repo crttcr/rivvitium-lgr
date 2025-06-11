@@ -4,6 +4,7 @@ pub mod helpers;
 pub mod menu;
 pub mod regions;
 pub mod widgets;
+pub mod views;
 pub mod visuals;
 
 use egui::TextureHandle;
@@ -13,8 +14,6 @@ use std::fmt;
 #[inline]
 #[allow(dead_code)]
 pub fn standard_button_width() -> f32 { 120.0 }
-
-
 
 
 /// UI-level state that lives alongside `AppState` / model state.
@@ -75,10 +74,10 @@ impl UiState {
         self.about_dialog_visible = true;
     }
 
-    #[inline]
-    pub fn hide_about_dialog(&mut self) {
-        self.about_dialog_visible = false;
-    }
+//    #[inline]
+//    pub fn hide_about_dialog(&mut self) {
+//        self.about_dialog_visible = false;
+//    }
 
     /* ─────────── about_dialog_texture ─────── */
 

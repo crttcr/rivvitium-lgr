@@ -9,6 +9,7 @@ pub enum ActiveAction {
 	#[default]
 	NoDataFile,
 	ParseInProgress,
+	ParseComplete,
 	DataFileOnly,
 	DataFileWithRelays,
 	CompletePipeline,

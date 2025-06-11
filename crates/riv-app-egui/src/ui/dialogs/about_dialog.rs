@@ -4,8 +4,7 @@ use crate::app::rivvitium_app::RivvitiumApp;
 pub fn open_about_dialog(app: &mut RivvitiumApp, ctx: &egui::Context) {
 	let mut open_flag = app.ui_state.about_dialog_visible;
 	egui::Window::new("About Rivvitium")
-		 .open(&mut open_flag)
-		 //.open(&mut app.ui_state.about_dialog_visible) // adds the little **×** close button
+		 .open(&mut open_flag)        // adds the little [x] close button
 		 .resizable(true)
 		 .collapsible(false)
 		 .show(ctx, |ui| {

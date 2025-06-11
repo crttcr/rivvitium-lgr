@@ -7,7 +7,14 @@ use crate::ui::regions::header::draw_header;
 use crate::ui::{dialogs, UiState};
 use crate::ui::menu::create_menu_bar;
 use std::fmt::Debug;
+use std::sync::mpsc;
+use apex::engines::riv::RivCommand;
+use crate::ui::regions::ActiveAction;
 use crate::ui::visuals::colors::ColorTheme;
+use tracing::{info, warn};
+use apex::engines::riv::riv_parser::RivParser;
+use apex::state::parse_detail_dto::ParseDetailDTO;
+use riv::model::ir::atom::Atom;
 
 // This is the main application. It both drawing particulars
 // and state values
@@ -15,6 +22,8 @@ use crate::ui::visuals::colors::ColorTheme;
 pub struct RivvitiumApp {
     pub app_state:      AppState,
     pub app_settings:   ColorTheme,
+    pub cmd_tx:         mpsc::Sender<RivCommand>,
+    pub atom_rx:        mpsc::Receiver<Atom>,
     pub ui_state:       UiState,
 }
 
@@ -32,12 +41,37 @@ impl RivvitiumApp {
     }
 }
 
+impl RivvitiumApp {
+	pub fn fire_parse_command(&mut self) {
+		if let Some(path) = self.app_state.get_selected_file() {
+			let file = path.clone();
+			let cmd  = RivCommand::Parse {file};
+			match self.cmd_tx.send(cmd) {
+				Ok(_) => {
+					let str = path.to_str().unwrap();
+					let dto = ParseDetailDTO::new(str);
+					self.app_state.with_dto(dto);
+					self.ui_state.set_active_panel(ActiveAction::ParseInProgress);
+				},
+				Err(x) => {
+					warn!("Send parse command failed: {}", x);
+				}
+			}
+		} else {
+			warn!("Application state does not contain an input file. Parse command was not sent.");
+		}
+	}
+}
+
 impl Default for RivvitiumApp {
 	fn default() -> Self {
-		let app_state       = AppState::default();
-		let app_settings    = ColorTheme::random();
-		let ui_state        = UiState::default();
-		RivvitiumApp{app_state, app_settings, ui_state}
+		let app_state          = AppState::default();
+		let app_settings       = ColorTheme::random();
+		let ui_state           = UiState::default();
+		let (cmd_tx, cmd_rx)   = mpsc::channel();
+		let (atom_tx, atom_rx) = mpsc::channel();
+		RivParser::spawn(cmd_rx, atom_tx);
+		RivvitiumApp{app_state, app_settings, cmd_tx, atom_rx, ui_state}
 	}
 }
 
@@ -54,12 +88,29 @@ impl eframe::App for RivvitiumApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         // Prep
         //
-        self.ensure_logo_loaded(ctx);
+        // ── 1. pump the progress channel  ───────────────────────────────
+        while let Ok(atom) = self.atom_rx.try_recv() {
+				info!("Received atom: {:?}", atom);
+				match atom {
+					Atom::EndTask => {
+						if let Some(dto) = &self.app_state.get_parse_detail() {
+							self.ui_state.set_active_panel(ActiveAction::ParseComplete);
+							let revised = dto.finished();
+							self.app_state.with_dto(revised)
+						}
+					},
+					_ => println!("Received atom: {:?}", atom),
+				}
+            ctx.request_repaint();  // keep UI fluid even if worker is slow
+        }
         
+        self.ensure_logo_loaded(ctx);
+
+	
         // Menu
         //
         create_menu_bar(self, ctx);
-        
+
         // Draw
         //
 			// ───────────────────── header ──────────────────────
@@ -70,7 +121,7 @@ impl eframe::App for RivvitiumApp {
 			// ───────────────────── footer ──────────────────────
 			egui::TopBottomPanel::bottom("footer").show(ctx, |ui| {
 		      draw_footer(ui);
-	    });        
+	    });
 			// ───────────────────── main content ────────────────
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.add_space(10.0);
