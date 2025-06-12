@@ -7,5 +7,6 @@ mod parse_helper;
 #[derive(Debug)]
 pub enum RivCommand {
     Parse { file: std::path::PathBuf },
+    Publish,
     Quit,
 }

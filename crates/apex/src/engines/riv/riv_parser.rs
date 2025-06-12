@@ -49,16 +49,16 @@ impl RivParser {
     fn run(self) {
         while let Ok(cmd) = self.cmd_rx.recv() {
             match cmd {
+                RivCommand::Publish => continue,
+                RivCommand::Quit    => break,
                 RivCommand::Parse { file } => {
                     if let Err(e) = self.handle_parse(file) {
                         eprintln!("[RivParser] parse error: {e}");
                     }
                 }
-                RivCommand::Quit => break,
-                // add more commands here
             }
         }
-        eprintln!("[RivParser] shutting down");
+        info!("[RivParser] shutting down");
     }
 
     /* ───────── command handlers ───────────────────────────────────── */
