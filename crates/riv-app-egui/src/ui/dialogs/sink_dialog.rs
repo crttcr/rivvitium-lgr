@@ -47,7 +47,7 @@ impl SinkDialog {
 
         if self.open {
         	let mut open_flag = true;
-            egui::Window::new("Configure sink")
+            egui::Window::new("Configure a data destination")
                 .collapsible(false)
                 .resizable(false)
                 .default_width(420.0)
@@ -99,11 +99,23 @@ impl SinkDialog {
 					  )
     				});
 					},
-                SinkKind::Csv | SinkKind::Json | SinkKind::Sqlite => {
-                    ui.label("Output path:");
+                SinkKind::Csv => {
+                    ui.label("CSV file path:");
+                    self.file_path = "/tmp/foo.csv".to_string();
                     self.path_edit_row(ui);
                 }
 
+                SinkKind::Json => {
+                    self.file_path = "/tmp/foo.json".to_string();
+                    ui.label("JSON file path:");
+                    self.path_edit_row(ui);
+                }
+
+                SinkKind::Sqlite => {
+                    self.file_path = "/tmp/foo.db".to_string();
+                    ui.label("Sqlite database path:");
+                    self.path_edit_row(ui);
+                }
                 _ => {}
             }
 
