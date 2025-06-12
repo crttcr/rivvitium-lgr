@@ -63,17 +63,14 @@ fn draw_destination_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 //
 
 fn draw_parse_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
+	let enabled = app.app_state.has_selected_file();
 	let text    = RichText::new("Parse").color(TEXT_ON_ACCENT).strong();
 	let stroke  = Stroke::new(1.0, ACCENT_BORDER);
 	let button  = Button::new(text)
 		.fill(ACCENT)
 		.stroke(stroke);
-	if app.app_state.has_selected_file() {
-			if ui.add_enabled(true, button).clicked() {
-				app.fire_parse_command();
-			}
-	}	else {
-			if ui.add_enabled(false, button).clicked() {}
+	if ui.add_enabled(enabled, button).clicked() {
+		app.fire_parse_command();
 	}
 }
 
@@ -109,6 +106,12 @@ fn draw_publish_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 		.fill(ACCENT)
 		.stroke(stroke);
 	if ui.add_enabled(enabled, button).clicked() {
-		app.ui_state.active_panel = ActiveAction::PostPublication;
+		app.fire_publish_command();
+		// FIXME: Need to figure out where recognize that publication is 
+		// complete and set the active panel to a value that will show it ...
+		//
+		if 1 < 0 {
+			app.ui_state.set_active_panel(ActiveAction::PostPublication)
+		}
 	}
 }

@@ -21,11 +21,13 @@ pub struct SinkDialog {
 
 impl Default for SinkDialog {
     fn default() -> Self {
+    	let kind      = SinkKind::Csv;
     	let delimiter = ",".to_string();
+    	let file_path = "/tmp/foo.csv".to_string();
         Self {
             open:      false,
-            kind:      SinkKind::DevNull,
-            file_path: String::new(),
+            kind,
+            file_path,
             delimiter,
             pretty:    true,
             server:    "localhost".into(),

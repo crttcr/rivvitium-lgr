@@ -61,6 +61,18 @@ impl RivvitiumApp {
 			warn!("Application state does not contain an input file. Parse command was not sent.");
 		}
 	}
+	
+	pub fn fire_publish_command(&mut self) {
+		if !self.app_state.sink_permits_publish() {
+			warn!("Application state does have a publishable configuration. Publish command was not sent.");
+			return
+		}
+		let _cmd  = RivCommand::Publish;
+		info!("Publish command handled.");
+		// Create a sink.
+		// Connect self.atom_rx to the sink
+		// Send a publish command
+	}
 }
 
 impl Default for RivvitiumApp {
@@ -95,9 +107,8 @@ impl eframe::App for RivvitiumApp {
 						info!("Headers: {:?}", row);
 						println!("Headers: {:?}", row);
 						if let Some(dto) = &self.app_state.get_parse_detail() {
-							self.ui_state.set_active_panel(ActiveAction::ParseComplete);
-							let revised = dto.finished();
-							self.app_state.with_dto(revised)
+							self.ui_state.set_active_panel(ActiveAction::ParseInProgress);
+							println!("Capture headers in DTO{:?}", dto);
 						}
 					},
 					Atom::EndTask => {
