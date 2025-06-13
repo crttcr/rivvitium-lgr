@@ -1,10 +1,11 @@
 
+pub mod parse_helper;
+pub mod pipe_metrics;
 pub mod riv_parser;
-mod parse_helper;
 
 /// Messages that the UI layer can send to the background worker.
 /// 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum RivCommand {
     Parse { file: std::path::PathBuf },
     Publish,
