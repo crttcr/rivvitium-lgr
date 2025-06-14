@@ -10,5 +10,4 @@ members = [
    "crates/zero",
 ]
 
-[workspace.package]
 resolver = "3"

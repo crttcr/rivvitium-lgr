@@ -33,22 +33,3 @@ use std::{fs::File, io::Write, path::PathBuf};
 	  assert!(!s.can_blueprint());
 	  assert!(!s.can_publish());
  }
-
- #[test]
- fn with_source_accepts_readable_file() {
-	  let file = make_temp_file();
-	  let (sender, _) = std::sync::mpsc::channel();
-	  let s    = AppState::new(sender).with_source(file.clone());
-	  assert!(s.can_parse());
- }
-
- #[test]
- fn with_source_rejects_unreadable_file() {
-	  let bogus = bogus_path();
-	  let (sender, _) = std::sync::mpsc::channel();
-	  let s = AppState::new(sender);
-	  let s_after = s.with_source(bogus);
-
-	  // Because the path is unreadable, the struct should be unchanged.
-	  assert!(!s_after.can_parse());
- }

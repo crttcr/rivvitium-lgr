@@ -14,7 +14,7 @@ pub struct Config {
 
 impl Config {
     pub fn new() -> Self { Self::default() }
-    
+
     // Predicates
     pub fn can_parse(&self)    -> bool {self.source.is_some()}
     pub fn can_publish(& self) -> bool {self.source.is_some() && self.sink.is_some()}
@@ -23,11 +23,11 @@ impl Config {
         self.source = Some(src);
         println!("PB: I now have a source");
     }
-    
+
     pub fn source_reset(&mut self) {
         self.source = None;
     }
-    
+
     pub fn add_relay(mut self, relay: Box<dyn RelayConfig>) {
         self.relays.push(relay);
         println!("PB: I have a new relay");

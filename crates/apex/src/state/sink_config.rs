@@ -4,8 +4,8 @@ use riv::component::sink::SinkKind;
 /// One strongly typed configuration value covering every supported sink.
 /// Variants with no additional settings (Capture, Console, DevNull)
 /// are bare, while those that need parameters carry them inline.
-/// 
-#[derive(Debug, Clone, PartialEq)]
+///
+#[derive(Debug, Clone, Default, PartialEq)]
 pub enum SinkConfig {
     /// Retains the data in memory (buffer is internal to the sink).
     Capture,
@@ -20,6 +20,7 @@ pub enum SinkConfig {
     },
 
     /// Discards all data.
+    #[default]
     DevNull,
 
     /// Emits a JSON file (optionally pretty-printed).
@@ -33,7 +34,7 @@ pub enum SinkConfig {
         server: String,
         port:   u16,
     },
-    
+
     /// Persists to SQLite table.
     Sqlite {
         db_path: PathBuf,
@@ -61,14 +62,14 @@ impl SinkConfig {
             pretty,
         }
     }
-    
+
     pub fn kafka(server: impl Into<String>, port: u16) -> Self {
         Self::Kafka {
             server: server.into(),
             port,
         }
     }
-    
+
     pub fn sqlite<P: Into<PathBuf>>(path: P, table: impl Into<String>) -> Self {
         Self::Sqlite {
             db_path: path.into(),
@@ -101,8 +102,3 @@ impl SinkConfig {
     }
 }
 
-impl Default for SinkConfig {
-    fn default() -> Self {
-        SinkConfig::DevNull
-    }
-}

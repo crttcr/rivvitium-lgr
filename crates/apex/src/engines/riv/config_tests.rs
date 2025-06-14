@@ -1,4 +1,6 @@
 
+use riv::component::source::SourceConfig;
+
 /* ───────── example usage ─────────────────────────────────────────
 
 let pipeline = ProcessingPipelineBuilder::new()
@@ -33,3 +35,30 @@ fn make_source() -> Box<dyn Source> {
 }
 
 */
+use riv::component::source::path_buf_config::PathBufConfig;
+use zero::util::file_utils::{bogus_path, make_temp_file_named};
+use crate::engines::riv::config::Config;
+
+#[test]
+fn with_source_accepts_readable_file() {
+	let mut cfg  = Config::new();
+	let pbuf     = make_temp_file_named("george.csv");
+	let src_cfg  = PathBufConfig::new(pbuf);
+	let src_cfg  = Box::new(src_cfg);
+	cfg.source(src_cfg);
+	let parse_ok = cfg.can_parse();
+	println!("{:#?}", parse_ok);
+	assert!(parse_ok);
+ }
+
+#[test]
+fn with_source_rejects_unreadable_file() {
+	let mut cfg  = Config::new();
+	let bogus    = bogus_path();
+	let src_cfg  = PathBufConfig::new(bogus);
+	let src_cfg  = Box::new(src_cfg);
+	cfg.source(src_cfg);
+	let parse_ok = cfg.can_parse();
+	println!("{:#?}", parse_ok);
+	assert!(!parse_ok);
+}

@@ -5,3 +5,4 @@ pub mod sink_config;
 
 #[cfg(test)]
 mod app_state_tests;
+mod sink_config_tests;

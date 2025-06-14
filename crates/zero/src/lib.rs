@@ -1,5 +1,5 @@
 pub mod util;
-pub mod telemetry;
+pub mod component;
 pub mod test_tools;
 
 pub fn add(left: u64, right: u64) -> u64 {
