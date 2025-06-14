@@ -25,37 +25,30 @@ use std::{fs::File, io::Write, path::PathBuf};
  // ---------- tests -------------------------------------------------------
 
  #[test]
- fn default_state_is_empty() {
-	  let s = AppState::default();
-	  assert_eq!(s.click_count(), 0);
-	  assert!(!s.has_selected_file());
-	  assert!(!s.can_run_pipeline());
- }
-
- #[test]
- fn capture_click_increments_count() {
-	  let mut state = AppState::default();
-		state.capture_click();
-	  assert_eq!(state.click_count(), 1);
-		state.capture_click();
-	  assert_eq!(state.click_count(), 2);
+ fn default_state_cannot_run_any_action() {
+	  let (sender, _) = std::sync::mpsc::channel();
+	  let s = AppState::new(sender);
+	  assert!(!s.can_parse());
+	  assert!(!s.can_analyze());
+	  assert!(!s.can_blueprint());
+	  assert!(!s.can_publish());
  }
 
  #[test]
  fn with_source_accepts_readable_file() {
 	  let file = make_temp_file();
-	  let s    = AppState::default().with_source(file.clone());
-	  assert!(s.has_selected_file());
+	  let (sender, _) = std::sync::mpsc::channel();
+	  let s    = AppState::new(sender).with_source(file.clone());
+	  assert!(s.can_parse());
  }
 
  #[test]
  fn with_source_rejects_unreadable_file() {
 	  let bogus = bogus_path();
-
-	  let s = AppState::default();
+	  let (sender, _) = std::sync::mpsc::channel();
+	  let s = AppState::new(sender);
 	  let s_after = s.with_source(bogus);
 
 	  // Because the path is unreadable, the struct should be unchanged.
-	  assert!(!s_after.has_selected_file());
-	  assert_eq!(s_after.click_count(), 0);
+	  assert!(!s_after.can_parse());
  }

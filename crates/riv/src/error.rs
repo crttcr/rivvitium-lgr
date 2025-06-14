@@ -10,6 +10,9 @@ use rusqlite::ffi;
 #[derive(Clone, Debug, Error, PartialEq)]
 pub enum Error
 {
+	#[error("Invalid Configuration: {0}")]
+	InvalidConfig(String),
+
 	#[error("Invalid input: {0}")]
 	Parse(String),
 

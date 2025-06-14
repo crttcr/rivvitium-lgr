@@ -1,8 +1,10 @@
 use std::{fmt::Debug, path::Path};
+use std::fmt::Display;
 use rusqlite::{params_from_iter, Connection, Error as RusqliteError};
 use crate::error::{Error, IoErrorWrapper};
-use tracing::instrument;
-use crate::component::sink::{Sink, SinkKind};
+use tracing::{error, info, instrument, warn};
+use tracing_subscriber::fmt::format;
+use crate::component::sink::{Sink, SinkConfig, SinkKind};
 use crate::model::ir::atom::Atom;
 use crate::model::ir::atom_type::AtomType;
 
@@ -14,7 +16,7 @@ pub struct SqliteSink {
     /// Filesystem path to the SQLite database file
     db_path: String,
     /// The open SQLite connection (populated in `initialize`)
-    conn: Option<Connection>,
+    cx: Option<Connection>,
     /// Table name to use (fixed as "records")
     table: String,
     /// Column names, populated when a `HeaderRowAtom` is accepted
@@ -25,31 +27,32 @@ impl SqliteSink {
     pub fn new(db_path: String) -> Self {
         SqliteSink {
             db_path,
-            conn: None,
+            cx: None,
             table: "records".to_string(),
             columns: Vec::new(),
         }
     }
 }
 
-impl Sink<()> for SqliteSink {
+impl Sink for SqliteSink {
 	fn kind(&self) -> SinkKind { SinkKind::Sqlite }
 
 //    #[instrument]
-    fn initialize<C: Debug + std::fmt::Display>(&mut self, _cfg: &C) -> Result<(), Error> {
+	fn initialize(&mut self, cfg: &dyn SinkConfig) -> Result<(), Error> {
+		
         // 1) Open (or create) the SQLite database file
-        let conn = Connection::open(&self.db_path).map_err(|e| {Error::from(e)})?;
+        let cx = Connection::open(&self.db_path).map_err(|e| {Error::from(e)})?;
            // .map_err(|e| Error::Io { source: IoErrorWrapper::from(e.into()) })?;
         // Turn on foreign keys, etc., if desired
-        conn.execute_batch("PRAGMA foreign_keys = ON;")
+        cx.execute_batch("PRAGMA foreign_keys = ON;")
             .map_err(|e| Error::General(format!("Failed to enable PRAGMA: {}", e)))?;
-        self.conn = Some(conn);
+        self.cx = Some(cx);
         Ok(())
     }
 
     fn accept(&mut self, atom: Atom) -> Result<(), Error> {
         // If Sink not initialized yet, that's a logic error
-        let conn = self.conn.as_mut().ok_or_else(|| {
+        let cx = self.cx.as_mut().ok_or_else(|| {
             Error::General("SqliteSink.accept called before initialize".into())
         })?;
 
@@ -78,7 +81,7 @@ impl Sink<()> for SqliteSink {
                     self.table,
                     col_defs.join(", ")
                 );
-                conn.execute_batch(&create_sql)
+                cx.execute_batch(&create_sql)
                     .map_err(|e| Error::General(format!("Failed to create table: {}", e)))?;
             }
 
@@ -109,7 +112,7 @@ impl Sink<()> for SqliteSink {
                         .join(", "),
                     placeholders
                 );
-                let mut stmt = conn.prepare(&insert_sql)
+                let mut stmt = cx.prepare(&insert_sql)
                     .map_err(|e| Error::General(format!("Failed to prepare INSERT: {}", e)))?;
 
                 // 6) Bind and execute
@@ -148,7 +151,7 @@ impl Sink<()> for SqliteSink {
                         .join(", "),
                     placeholders
                 );
-                let mut stmt = conn.prepare(&insert_sql)
+                let mut stmt = cx.prepare(&insert_sql)
                     .map_err(|e| Error::General(format!("Failed to prepare INSERT: {}", e)))?;
                 stmt.execute(params_from_iter(vals.iter()))
                     .map_err(|e| Error::General(format!("Failed to insert row: {}", e)))?;
@@ -163,16 +166,15 @@ impl Sink<()> for SqliteSink {
     }
 
     #[instrument(skip(self), fields(self = "SqliteSink", db_path=%self.db_path))]
-    fn finish(&mut self) -> Result<(), Error> {
+    fn close(&mut self) {
         // 7) Finalize by closing the connection (drop it)
-        if let Some(conn) = self.conn.take() {
-            conn.close()
-                .map_err(|(_, err)| Error::General(format!("Error closing DB: {}", err)))?;
-            Ok(())
+        if let Some(cx) = self.cx.take() {
+            match cx.close() {
+            	Ok(_)         => info!("Successfully closed the connection."),
+            	Err((_, err)) => warn!("Error closing db: {}", err),
+            }
         } else {
-            Err(Error::General(
-                "finish called but no active SQLite connection".into(),
-            ))
+				warn!("Close called but no active SqlLite connection");
         }
     }
 }

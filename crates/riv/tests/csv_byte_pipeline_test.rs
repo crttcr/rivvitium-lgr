@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::num::IntErrorKind::Empty;
 use riv::component::relay::console_relay::ConsoleRelay;
 use riv::component::relay::Relay;
 use riv::component::sink::Sink;
@@ -6,8 +7,11 @@ use riv::component::source::Source;
 use riv::{data_file_path_as_str, Error};
 use tracing_subscriber::{fmt, EnvFilter};
 use tracing_subscriber::fmt::format::FmtSpan;
+use riv::component::relay::empty_relay_config::EmptyRelayConfig;
 use riv::component::sink::csv_sink::CsvSink;
+use riv::component::sink::empty_sink_config::EmptySinkConfig;
 use riv::component::source::csv_byte_source::CsvByteSource;
+
 
 #[test]
 pub fn run_csv_byte_pipeline() -> Result<(), Error> {
@@ -26,9 +30,10 @@ pub fn run_csv_byte_pipeline() -> Result<(), Error> {
 	let mut dst   = CsvSink::new("csv_byte_output.csv".to_string());
 
 	tracing::info!("Initializing pipeline components");
-	let cfg             = "TODO: Use configuration".to_owned();
-	let relay_msg       = relay.initialize(&cfg)?;
-	let target_msg      = dst.initialize(&cfg)?;
+	let relay_cfg       = EmptyRelayConfig::default();
+	let relay_msg       = relay.initialize(&relay_cfg)?;
+	let target_cfg      = EmptySinkConfig::default();
+	let target_msg      = dst.initialize(&target_cfg)?;
 
 	assert_eq!(relay_msg,  ());
 	assert_eq!(target_msg, ());
@@ -42,11 +47,10 @@ pub fn run_csv_byte_pipeline() -> Result<(), Error> {
 	}
 
 	tracing::info!("Finishing components");
-	let source_ok = src.finish()?;
+	let source_ok = src.close()?;
 	let relay_ok  = relay.finish();
-	let count     = dst.finish()?;
+	dst.close();
 	assert!(source_ok);
 	assert!(relay_ok);
-	println!("{:?}", count);
 	Ok(())
 }

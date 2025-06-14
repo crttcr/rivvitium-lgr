@@ -1,5 +1,5 @@
 use crate::component::source::csv_adapter::CsvState;
-use crate::component::source::{Source, SourceState};
+use crate::component::source::{Source, SourceConfig, SourceState};
 use crate::model::ir::atom::Atom;
 use crate::Error;
 use csv_core;
@@ -121,6 +121,33 @@ impl<R: Read> CsvByteSource<R> {
 }
 
 impl<R: Read> Source for CsvByteSource<R> {
+
+	// fn from_config(cfg: &dyn SourceConfig) -> Result<Box<Self>, Error> {
+	// 	if let(Some(file_path)) = cfg.path_buf() {
+	// 		match File::open(&file_path) {
+	// 			Err(e) => {
+	// 				warn!("{}", e);
+	// 				let source = IoErrorWrapper::from(e);
+	// 				let err    = Error::from(source);
+	// 				Err(err)
+	// 		},
+	// 			Ok(file) => {
+	// 				info!("\n--- File open success: '{:?}'", file_path);
+	// 				let parser    = csv_core::ReaderBuilder::new().delimiter(b';').build();
+	// 				let reader    = BufReader::new(file);
+	// 				let state     = ByteReaderState::new(reader, parser);
+	// 				let state     = SourceState::Ready(state);
+	// 				let source    = CsvByteSource{state};
+	// 				Ok(Box::new(source))
+	// 			}
+	// 		}	
+	// 	} else {
+	// 		let msg = format!("CsvByteSource::from_config called without path_buf");
+	// 		let err = Error::InvalidConfig(msg);
+	// 		Err(err)
+	// 	}
+   //  }
+    
 /*
 	#[instrument]
 	fn initialize<CFG: Display + Debug>(&mut self, _cfg: &CFG) -> Result<(), Error> {
@@ -146,7 +173,7 @@ impl<R: Read> Source for CsvByteSource<R> {
  */
 
 	#[instrument(skip(self))]
-	fn finish(&mut self) -> Result<bool, Error> {
+	fn close(&mut self) -> Result<bool, Error> {
 		Ok(true)
 	}
 }

@@ -16,7 +16,7 @@ fn test_initialize_and_iterate() -> Result<(), Error> {
 	println!("{:?}", collected);	
 	// After completion, next yields None
 	assert!(src.next().is_none());
-	let rv = src.finish()?;
+	let rv = src.close()?;
 	assert!(rv);
 	Ok(())
 }

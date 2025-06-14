@@ -2,7 +2,7 @@ use std::fmt::{Debug, Display};
 use tracing::{info, instrument};
 use crate::Error;
 use crate::model::ir::atom::Atom;
-use crate::component::relay::Relay;
+use crate::component::relay::{Relay, RelayConfig};
 
 #[derive(Debug)]
 pub struct ConsoleRelay;
@@ -13,9 +13,9 @@ impl ConsoleRelay {
 	}
 }
 
-impl Relay<()> for ConsoleRelay {
+impl Relay for ConsoleRelay {
 	#[instrument]
-	fn initialize<C: Display + Debug>(&mut self, _cfg: &C) -> Result<(), Error> {
+	fn initialize(&mut self, _cfg: &dyn RelayConfig) -> Result<(), Error> {
 		Ok(())
 	}
 
@@ -33,6 +33,4 @@ impl Relay<()> for ConsoleRelay {
 		println!("--- ConsoleRelay finished ---");
 		true
 	}
-
-	fn result(&mut self) -> &() { &() }
 }

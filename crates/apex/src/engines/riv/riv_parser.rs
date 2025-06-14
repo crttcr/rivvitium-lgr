@@ -49,10 +49,12 @@ impl RivParser {
     fn run(self) {
         while let Ok(cmd) = self.cmd_rx.recv() {
             match cmd {
+                RivCommand::Analyze => continue,
+                RivCommand::Blueprint => continue,
                 RivCommand::Publish => continue,
                 RivCommand::Quit    => break,
-                RivCommand::Parse { file } => {
-                    if let Err(e) = self.handle_parse(file) {
+                RivCommand::Parse   => {
+                    if let Err(e) = self.handle_parse() {
                         eprintln!("[RivParser] parse error: {e}");
                     }
                 }
@@ -63,9 +65,11 @@ impl RivParser {
 
     /* ───────── command handlers ───────────────────────────────────── */
 
-    fn handle_parse(&self, file: PathBuf) -> io::Result<()> {
+    //fn handle_parse(&self, file: PathBuf) -> io::Result<()> {
+    fn handle_parse(&self) -> io::Result<()> {
         let started    = Instant::now();
         info!("Parse started: {:?}", started.elapsed());
+        let file = unimplemented!();
         let mut source = open_source(&file).map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
         
 			info!("Start pulling atoms from source");

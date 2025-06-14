@@ -6,7 +6,9 @@ use riv::component::source::Source;
 use riv::Error;
 use tracing_subscriber::{fmt, EnvFilter};
 use tracing_subscriber::fmt::format::FmtSpan;
+use riv::component::relay::empty_relay_config::EmptyRelayConfig;
 use riv::component::sink::csv_sink::CsvSink;
+use riv::component::sink::empty_sink_config::EmptySinkConfig;
 
 #[test]
 pub fn test_csv_pipeline() -> Result<(), Error> {
@@ -25,8 +27,10 @@ pub fn test_csv_pipeline() -> Result<(), Error> {
 
 	tracing::info!("Initializing pipeline components");
 	let cfg             = "TODO: Use configuration".to_owned();
-	let relay_msg       = relay.initialize(&cfg)?;
-	let target_msg      = dst.initialize(&cfg)?;
+	let target_cfg      = EmptySinkConfig::default();
+	let target_msg      = dst.initialize(&target_cfg)?;
+	let relay_cfg       = EmptyRelayConfig::default();
+	let relay_msg       = relay.initialize(&relay_cfg)?;
 
 	assert_eq!(relay_msg,  ());
 	assert_eq!(target_msg, ());
@@ -40,11 +44,10 @@ pub fn test_csv_pipeline() -> Result<(), Error> {
 	}
 
 	tracing::info!("Finishing components");
-	let source_ok = src.finish()?;
+	let source_ok = src.close()?;
 	let relay_ok  = relay.finish();
-	let count     = dst.finish()?;
+	let count     = dst.close();
 	assert!(source_ok);
 	assert!(relay_ok);
-	println!("{:?}", count);
 	Ok(())
 }

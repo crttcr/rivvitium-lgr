@@ -4993,6 +4993,7 @@ name = "riv-app-egui"
 version = "0.1.0"
 dependencies = [
  "apex",
+ "chrono",
  "eframe",
  "egui",
  "egui_extras",

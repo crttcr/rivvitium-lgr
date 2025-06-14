@@ -1,7 +1,7 @@
 use std::fmt::Display;
 use crate::Error;
 use crate::model::ir::atom::Atom;
-use crate::component::relay::Relay;
+use crate::component::relay::{Relay, RelayConfig};
 
 
 //
@@ -18,8 +18,8 @@ impl StatisticsRelay {
 	}
 }
 
-impl Relay<u64> for StatisticsRelay {
-	fn initialize<C: Display>(&mut self, cfg: &C) -> Result<(), Error> {
+impl Relay for StatisticsRelay {
+	fn initialize(&mut self, cfg: &dyn RelayConfig) -> Result<(), Error> {
 		println!("--- StatisticsRelay initialized --- {}", cfg);
 		Ok(())
 	}
@@ -34,5 +34,4 @@ impl Relay<u64> for StatisticsRelay {
 		true
 	}
 	
-	fn result(&mut self) -> &u64 {&self.total}
 }

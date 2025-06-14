@@ -1,0 +1,7 @@
+
+# rustfmt.toml
+
+fn_single_line    = true   # collapse trivial functions if they fit `max_width`
+hard_tabs         = true   # ← emit actual tabs instead of spaces
+tab_spaces        = 3      # → each indent level is three spaces  # visual width a tab represents in editors (optional)
+

@@ -1,9 +1,11 @@
 pub mod capture_sink;
 pub mod console_sink;
 pub mod csv_sink;
+pub mod empty_sink_config;
 pub mod sqlite_sink;
 
 use std::fmt::{self, Debug, Display};
+use std::path::{Path, PathBuf};
 use crate::model::ir::atom::Atom;
 use crate::error::Error;
 
@@ -49,10 +51,18 @@ impl fmt::Display for SinkKind {
     }
 }
 
-pub trait Sink<R> 
+pub trait Sink
 {
-	fn kind(&self)                                        -> SinkKind;
-	fn initialize<C: Display + Debug>(&mut self, cfg: &C) -> Result<(), Error>;
-	fn accept(&mut self, atom: Atom)                      -> Result<(), Error>;
-	fn finish(&mut self)                                  -> Result<R,  Error>;
+	fn kind(&self)                                 -> SinkKind;
+	fn initialize(&mut self, cfg: &dyn SinkConfig) -> Result<(), Error>;
+	fn accept(&mut self, atom: Atom)               -> Result<(), Error>;
+	fn close(&mut self);
+}
+
+pub trait SinkConfig: Debug + Display {
+    fn path_buf     (&self)             -> Option<PathBuf>;
+    fn string_value (&self, name: &str) -> Option<String>;
+    fn integer_value(&self, name: &str) -> Option<i32>;
+    fn float_value  (&self, name: &str) -> Option<f32>;
+    fn bool_value   (&self, name: &str) -> Option<bool>;
 }

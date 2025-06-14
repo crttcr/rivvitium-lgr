@@ -2,19 +2,21 @@
 
 use crate::model::ir::atom::Atom;
 use crate::error::Error;
-use crate::component::sink::{Sink, SinkKind};
+use crate::component::sink::{Sink, SinkConfig, SinkKind};
 
 use std::fmt::{Debug, Display};
-use tracing::{info, instrument};
+use rusqlite::Connection;
+use tracing::{info, instrument, warn};
 
 #[derive(Debug)]
 pub struct CaptureSink {
-	atoms: Vec<Atom>,
+	atoms:       Vec<Atom>,
+	is_closed:   bool,
 }
 
 impl CaptureSink {
 	pub fn new() -> Self {
-		Self { atoms: Vec::new() }
+		Self { atoms: Vec::new(), is_closed: false }
 	}
 
 	pub fn into_atoms(self) -> Vec<Atom> {
@@ -22,23 +24,26 @@ impl CaptureSink {
 	}
 }
 
-impl Sink<Vec<Atom>> for CaptureSink {
+impl Sink for CaptureSink {
 	fn kind(&self) -> SinkKind { SinkKind::Capture }
         
 	#[instrument]
-	fn initialize<C: Display + Debug>(&mut self, _cfg: &C) -> Result<(), Error> {
+	fn initialize(&mut self, _cfg: &dyn SinkConfig) -> Result<(), Error> {
 		self.atoms.clear();
 		Ok(())
 	}
 
 	fn accept(&mut self, atom: Atom) -> Result<(), Error> {
-		self.atoms.push(atom);
-		Ok(())
+		if self.is_closed {
+			let msg = "CaptureSink already closed. Not accepting new atoms.";
+			warn!(msg);
+			Err(Error::InvalidInput(msg.into()))
+		} else {
+			self.atoms.push(atom);
+			Ok(())
+		}
 	}
 
 	#[instrument]
-	fn finish(&mut self) -> Result<Vec<Atom>, Error> {
-		let rv: Vec<Atom> = self.atoms.drain(..).collect();
-		Ok(rv)
-	}
+	fn close(&mut self) {}
 }

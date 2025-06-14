@@ -4,7 +4,7 @@ use tracing::info;
 use crate::model::ir::atom::Atom;
 use crate::error::Error;
 use crate::model::ir::atom::Atom::ErrorAtom;
-use crate::component::source::{Source, SourceState};
+use crate::component::source::{Source, SourceConfig, SourceState};
 
 /// A `Source` that yields atoms from an in-memory Vec.
 pub struct VectorSource {
@@ -51,9 +51,15 @@ impl Iterator for VectorSource {
 }
 
 impl Source for VectorSource {
+
+	// fn from_config(_cfg: &dyn SourceConfig) -> Result<Box<Self>, Error> {
+	// 	Err(Error::InvalidConfig("[VectorSource]: do not use config to create this source. Call VectorSource::new(atoms) directly".to_owned()))
+   //  }
+	// 
+	
 	// Only return Ok(true) if iteration has completed
 	//
-	fn finish(&mut self) -> Result<bool, Error> {
+	fn close(&mut self) -> Result<bool, Error> {
 		println!("finish() called");
 		match &self.state {
 			SourceState::Completed => Ok(true),

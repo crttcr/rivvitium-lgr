@@ -1,9 +1,10 @@
 use crate::component::source::csv_adapter::CsvState;
-use crate::component::source::{Source, SourceState};
+use crate::component::source::{Source, SourceConfig, SourceState};
 use crate::model::ir::atom::Atom;
 use crate::Error;
 use std::fmt::{Debug, Display};
 use tracing::instrument;
+use crate::error::IoErrorWrapper;
 use crate::model::ir::atom::Atom::StringRowAtom;
 use crate::model::ir::string_row::StringRow;
 
@@ -38,8 +39,28 @@ impl CsvStringSource {
 }
 
 impl Source for CsvStringSource {
+	// fn from_config(cfg: &dyn SourceConfig) -> Result<Box<Self>, Error> {
+	// 	if let(Some(file_path)) = cfg.path_buf() {
+	// 		let file_path_string = file_path.clone().into_os_string().into_string();
+	// 		match file_path_string {
+	// 			Ok(path) => {
+	// 				let source    = CsvStringSource::new(path);
+	// 				Ok(Box::new(source))
+	// 			},
+	// 			Err(x) => {
+	// 				let msg = format!("Bad path: {:?}", x);
+	// 				let err = Error::InvalidConfig(msg);
+	// 				Err(err)
+	// 			},
+	// 		}
+	// 	} else {
+	// 	 	let msg = "CsvStringSource can only be called on file paths".to_string();
+	// 	 Err(Error::InvalidConfig(msg))
+	// 	}
+	// }
+	
 	#[instrument]
-	fn finish(&mut self) -> Result<bool, Error> {
+	fn close(&mut self) -> Result<bool, Error> {
 		Ok(true)
 	}
 }
