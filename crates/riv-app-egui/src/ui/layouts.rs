@@ -1,12 +1,14 @@
 
 use std::time::{Duration, Instant};
+use eframe::emath::Align;
+use egui::Layout;
 use apex::state::parse_detail_dto::ParseDetailDTO;
 use crate::app::rivvitium_app::RivvitiumApp;
 use crate::ui::regions::button_bar::draw_button_bar;
 use crate::ui::views::activity_view::{activity_view, ActivityEvent};
 use crate::ui::views::data_view::data_view;
 use crate::ui::views::sink_detail_view::draw_sink_detail_view;
-use crate::ui::views::source_detail_view::show_source_detail_view;
+use crate::ui::views::source_detail_view::{draw_source_detail_view};
 
 pub fn draw_main_screen(app: &mut RivvitiumApp, ctx: &egui::Context) {
 
@@ -25,12 +27,12 @@ pub fn draw_main_screen(app: &mut RivvitiumApp, ctx: &egui::Context) {
         /* --------------- row 0 --------------- */
             draw_button_bar(app, ui);
         /* --------------- row 1 --------------- */
-        ui.horizontal(|ui| {
+        ui.with_layout(Layout::left_to_right(Align::Min), |ui| {
             let height = ui.available_height();
             let width  = ui.available_width() * 0.5;          // equal-width split for source & sink
             let size   = egui::vec2(width, height);
             ui.allocate_ui(size, |ui| {
-                show_source_detail_view(ui, &dto);
+                draw_source_detail_view(ui, &dto);
             });
             ui.allocate_ui(size, |ui| {
                 draw_sink_detail_view(ui, &dto);
