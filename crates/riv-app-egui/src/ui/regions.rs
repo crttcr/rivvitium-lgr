@@ -5,13 +5,9 @@ pub mod footer;
 pub mod header;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub enum ActiveAction {
+pub enum ApplicationStatus {
 	#[default]
-	NoDataFile,
-	ParseInProgress,
-	ParseComplete,
-	DataFileOnly,
-	DataFileWithRelays,
-	CompletePipeline,
-	PostPublication,
+	NotConfigured,
+	Idle,
+	Running,
 }

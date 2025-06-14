@@ -9,6 +9,7 @@ pub fn create_menu_bar(state: &mut RivvitiumApp, ctx: &egui::Context) {
     egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
         egui::menu::bar(ui, |ui| {
             draw_file_menu(ui, state);
+            draw_source_menu(ui, state);
             draw_relay_menu(ui, state);
             draw_destination_menu(ui, state);
             draw_run_menu(ui, state);
@@ -22,30 +23,8 @@ pub fn create_menu_bar(state: &mut RivvitiumApp, ctx: &egui::Context) {
 //
 fn draw_file_menu(ui: &mut egui::Ui, state: &mut RivvitiumApp) {
     ui.menu_button("File", |ui| {
-	    inject_button_file_open(ui, state);
-	    inject_button_file_close(ui, state);
 	    inject_button_file_exit(ui, state);
     });
-}
-
-fn inject_button_file_open(ui: &mut egui::Ui, app: &mut RivvitiumApp) {
-	let enabled = true;
-	let text    = RichText::new("Open ...");
-	let button  = Button::new(text);
-	if ui.add_enabled(enabled, button).clicked() {
-		choose_file_with_native_dialog(&mut app.app_state, &mut app.ui_state);
-      ui.close_menu(); // collapse the menu
-	}
-}
-
-fn inject_button_file_close(ui: &mut egui::Ui, app: &mut RivvitiumApp) {
-	let enabled = app.app_state.has_selected_file();
-	let text    = RichText::new("Close");
-	let button  = Button::new(text);
-	if ui.add_enabled(enabled, button).clicked() {
-		app.app_state.close_file();
-      ui.close_menu(); // collapse the menu
-	}
 }
 
 fn inject_button_file_exit(ui: &mut egui::Ui, app: &mut RivvitiumApp) {
@@ -56,6 +35,35 @@ fn inject_button_file_exit(ui: &mut egui::Ui, app: &mut RivvitiumApp) {
 	}
 }
 
+// Source Menu
+//
+fn draw_source_menu(ui: &mut egui::Ui, state: &mut RivvitiumApp) {
+    ui.menu_button("Data source", |ui| {
+	    inject_button_source_open(ui, state);
+	    inject_button_file_close(ui, state);
+    });
+}
+
+fn inject_button_source_open(ui: &mut egui::Ui, app: &mut RivvitiumApp) {
+	let enabled = !app.app_state.can_parse();
+	let text    = RichText::new("Open data source...");
+	let button  = Button::new(text);
+	if ui.add_enabled(enabled, button).clicked() {
+		choose_file_with_native_dialog(&mut app.app_state, &mut app.ui_state);
+      ui.close_menu(); // collapse the menu
+	}
+}
+
+fn inject_button_file_close(ui: &mut egui::Ui, app: &mut RivvitiumApp) {
+	let enabled = app.app_state.can_parse();
+	let text    = RichText::new("Close data source");
+	let button  = Button::new(text);
+	if ui.add_enabled(enabled, button).clicked() {
+		app.app_state.close_source_file();
+      ui.close_menu();
+	}
+}
+
 // Relay Menu
 //
 fn draw_relay_menu(ui: &mut egui::Ui, state: &mut RivvitiumApp) {
@@ -63,9 +71,19 @@ fn draw_relay_menu(ui: &mut egui::Ui, state: &mut RivvitiumApp) {
         if ui.button("Add a relay").clicked() {
             state.ui_state.show_about_dialog();
         };
-        ui.label("Remove relay");
-        ui.label("Clear all relays");
+        ui.label("Remove relay (TODO)");
+	    inject_button_relay_clear(ui, state);
     });
+}
+
+fn inject_button_relay_clear(ui: &mut egui::Ui, app: &mut RivvitiumApp) {
+	let enabled = app.app_state.has_selected_relays();
+	let text    = RichText::new("Clear all relays");
+	let button  = Button::new(text);
+	if ui.add_enabled(enabled, button).clicked() {
+		app.app_state.clear_relays();
+      ui.close_menu();
+	}
 }
 
 // Destination Menu
@@ -86,14 +104,14 @@ fn draw_destination_menu(ui: &mut egui::Ui, state: &mut RivvitiumApp) {
 //
 fn draw_run_menu(ui: &mut egui::Ui, state: &mut RivvitiumApp) {
     ui.menu_button("Run", |ui| {
-			let enabled = state.app_state.has_selected_file();
+			let enabled = state.app_state.can_parse();
 			let text    = RichText::new("Parse selected file");
 			let button  = Button::new(text);
 			if ui.add_enabled(enabled, button).clicked() {
 				state.fire_parse_command();
 			}
-        if ui.button("Add action 2").clicked() {};
-        if ui.button("Add action 3").clicked() {};
+        if ui.button("TODO: Analyze").clicked() {};
+        if ui.button("TODO: Blueprint").clicked() {};
     });
 }
 

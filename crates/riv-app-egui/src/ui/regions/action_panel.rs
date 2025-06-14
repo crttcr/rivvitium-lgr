@@ -2,20 +2,22 @@ use crate::app::rivvitium_app::RivvitiumApp;
 use eframe::emath::Align;
 use egui::Layout;
 use apex::state::parse_detail_dto::{ParseDetailDTO, ParseStatus};
-use crate::ui::regions::ActiveAction;
-use crate::ui::views::parse_detail_view;
+use crate::ui::regions::ApplicationStatus;
+use crate::ui::views::source_detail_view;
 
+/*
 pub fn draw_main_panel(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
-	match app.ui_state.active_panel() {
-		ActiveAction::DataFileOnly        => {draw_ready_panel(app, ui)}
-		ActiveAction::ParseInProgress     => {draw_parse_detail_panel(app, ui)}
-		ActiveAction::ParseComplete       => {draw_parse_detail_panel(app, ui)}
-		ActiveAction::DataFileWithRelays  => {draw_run_panel(   app, ui)}
-		ActiveAction::CompletePipeline    => {draw_result_panel(app, ui)}
-		ActiveAction::PostPublication     => {draw_post_publication_panel(app, ui)}
+	match app.ui_state.current_status() {
+		ApplicationStatus::DataFileOnly        => {draw_ready_panel(app, ui)}
+		ApplicationStatus::Idle                => {draw_parse_detail_panel(app, ui)}
+		ApplicationStatus::Running             => {draw_parse_detail_panel(app, ui)}
+		ApplicationStatus::DataFileWithRelays  => {draw_run_panel(   app, ui)}
+		ApplicationStatus::CompletePipeline    => {draw_result_panel(app, ui)}
+		ApplicationStatus::PostPublication     => {draw_post_publication_panel(app, ui)}
       _                                 => {draw_no_datafile_panel(app, ui)}
 	}
 }
+ */
 
 // This was not needed when we used TopBottomPanel for the header and footer
 //
@@ -32,13 +34,13 @@ fn draw_no_datafile_panel(_app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 }
 
 fn draw_parse_detail_panel(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
-	match app.app_state.get_parse_detail() { 
+	match app.app_state.get_parse_detail() {
 		Some(dto) => {
-			parse_detail_view::show_parse_detail(ui, dto);
+			source_detail_view::show_source_detail_view(ui, dto);
 		},
 		None      => {
 			let dto = ParseDetailDTO::new("bogus_file_no_parse_detail").with_parse_status(ParseStatus::Error);
-			parse_detail_view::show_parse_detail(ui, &dto);
+			source_detail_view::show_source_detail_view(ui, &dto);
 		},
 	}
 }
@@ -48,8 +50,8 @@ fn draw_ready_panel(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	ui.separator();
 	ui.add_space(3.0);
 	if ui.button("Click to simulate run").clicked() {
-            app.ui_state.set_active_panel(ActiveAction::DataFileWithRelays);
-            app.app_state.capture_click();
+            app.ui_state.set_application_status(ApplicationStatus::Idle);
+            //TODO:  app.app_state.capture_click();
    }
 }
 
@@ -59,8 +61,8 @@ fn draw_run_panel(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	ui.separator();
     ui.add_space(5.0); // Add some space before the horizontal group
 	if ui.button("Click to reset").clicked() {
-            app.ui_state.set_active_panel(ActiveAction::CompletePipeline);
-            app.app_state.set_click_count(2_000_000);
+            app.ui_state.set_application_status(ApplicationStatus::Idle);
+            // TODO: app.app_state.set_click_count(2_000_000);
    }
 }
 
@@ -69,8 +71,8 @@ fn draw_result_panel(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	ui.separator();
 	ui.add_space(10.0); // Add some space before the horizontal group
 	if ui.button("Click to set panel to Home").clicked() {
-        		app.ui_state.set_active_panel(ActiveAction::NoDataFile);
-            app.app_state.set_click_count(2_000_000);
+        		app.ui_state.set_application_status(ApplicationStatus::NotConfigured);
+            // TODO: app.app_state.set_click_count(2_000_000);
    }
 }
 
@@ -80,20 +82,20 @@ fn draw_post_publication_panel(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
     ui.horizontal(|ui| {
         // <--- This is the key: a horizontal sub-UI
         if ui.button("Click to make ready").clicked() {
-        		app.ui_state.set_active_panel(ActiveAction::DataFileOnly);
+        		app.ui_state.set_application_status(ApplicationStatus::Running);
         }
-        ui.label(format!("Button clicked {} times!", app.app_state.click_count()));
+        ui.label(format!("Button clicked {} times!", 44));
     });
 
     ui.add_space(10.0);
-    ui.label(format!("Button clicked {} times!", app.app_state.click_count()));
+    ui.label(format!("Button clicked {} times!", 45));
     if ui.button("Click me to increase the count!").clicked() {
-        app.app_state.capture_click();
+        // TODO: app.app_state.capture_click();
     }
 
     ui.add_space(20.0);
     if ui.button("Reset Counter").clicked() {
-        app.app_state.reset_clicks();
+        // TODO: app.app_state.reset_clicks();
     }
 
     ui.add_space(20.0);
@@ -105,7 +107,7 @@ fn draw_post_publication_panel(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
             ui.horizontal(|ui| {
                 ui.label("Reset the counter:");
                 if ui.button("Reset Counter").clicked() {
-        					app.app_state.reset_clicks();
+        					// TODO: app.app_state.reset_clicks();
                 }
             });
         },

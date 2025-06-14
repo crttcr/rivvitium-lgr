@@ -3,7 +3,7 @@ use crate::ui::visuals::colors::{apply_color_theme, ACCENT, ACCENT_BORDER, TEXT_
 use eframe::epaint::Stroke;
 use egui::{Button, RichText};
 use crate::ui::dialogs::file_dialog::choose_file_with_native_dialog;
-use crate::ui::regions::ActiveAction;
+use crate::ui::regions::ApplicationStatus;
 
 /// Draw a horizontal array of buttons and wire behavior
 ///
@@ -30,7 +30,7 @@ pub fn draw_button_bar(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 //
 
 fn draw_source_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
-	let enabled = app.app_state.has_selected_file() == false;
+	let enabled = !app.app_state.can_parse();
 	let text    = RichText::new("Source");
 	let button  = Button::new(text);
 	if ui.add_enabled(enabled, button).clicked() {
@@ -43,7 +43,7 @@ fn draw_relays_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	let text    = RichText::new("Relays");
 	let button  = Button::new(text);
 	if ui.add_enabled(enabled, button).clicked() {
-		app.app_state.capture_click();
+		// FIXME: app.app_state.capture_click();
 	}
 }
 
@@ -54,7 +54,7 @@ fn draw_destination_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	if ui.add_enabled(enabled, button).clicked() {
 		println!("Destination button clicked");
 		app.ui_state.set_sink_dialog_visible();
-		app.app_state.capture_click();
+		// FIXME:  app.app_state.capture_click();
 	}
 }
 
@@ -63,7 +63,7 @@ fn draw_destination_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 //
 
 fn draw_parse_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
-	let enabled = app.app_state.has_selected_file();
+	let enabled = app.app_state.can_parse();
 	let text    = RichText::new("Parse").color(TEXT_ON_ACCENT).strong();
 	let stroke  = Stroke::new(1.0, ACCENT_BORDER);
 	let button  = Button::new(text)
@@ -75,31 +75,32 @@ fn draw_parse_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 }
 
 fn draw_analyze_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
-	let enabled = app.app_state.has_selected_relays();
+	let enabled = app.app_state.can_analyze();
 	let text    = RichText::new("Analyze").color(TEXT_ON_ACCENT).strong();
 	let stroke  = Stroke::new(1.0, ACCENT_BORDER);
 	let button  = Button::new(text)
 		.fill(ACCENT)
 		.stroke(stroke);
 	if ui.add_enabled(enabled, button).clicked() {
-		app.app_state.capture_click();
+		app.fire_analyze_command();
 	}
 }
 
 fn draw_blueprint_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
-	let enabled = app.app_state.has_selected_file();
+	let enabled = app.app_state.can_blueprint();
+	let text    = RichText::new("Parse").color(TEXT_ON_ACCENT).strong();
 	let text    = RichText::new("Blueprint").color(TEXT_ON_ACCENT).strong();
 	let stroke  = Stroke::new(1.0, ACCENT_BORDER);
 	let button  = Button::new(text)
 		.fill(ACCENT)
 		.stroke(stroke);
 	if ui.add_enabled(enabled, button).clicked() {
-		app.app_state.capture_click();
+		app.fire_blueprint_command();
 	}
 }
 
 fn draw_publish_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
-	let enabled = app.app_state.sink_permits_publish();
+	let enabled = app.app_state.can_publish();
 	let text    = RichText::new("Publish").color(TEXT_ON_ACCENT).strong();
 	let stroke  = Stroke::new(1.0, ACCENT_BORDER);
 	let button  = Button::new(text)
@@ -107,11 +108,5 @@ fn draw_publish_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 		.stroke(stroke);
 	if ui.add_enabled(enabled, button).clicked() {
 		app.fire_publish_command();
-		// FIXME: Need to figure out where recognize that publication is 
-		// complete and set the active panel to a value that will show it ...
-		//
-		if 1 < 0 {
-			app.ui_state.set_active_panel(ActiveAction::PostPublication)
-		}
 	}
 }

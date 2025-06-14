@@ -15,3 +15,4 @@ riv         = {path = "../riv"}
 tracing     = "0.1"
 zero        = {path = "../zero"}
 rand = "0.9.1"
+chrono = "0.4.41"

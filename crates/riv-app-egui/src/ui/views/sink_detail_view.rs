@@ -3,27 +3,24 @@ use egui_extras::{Column, TableBuilder};
 use apex::state::parse_detail_dto::ParseDetailDTO;           // the model type
 use crate::ui::helpers;
 
-const HORIZONTAL_PERCENT: f32 = 0.55;
+const HORIZONTAL_PERCENT: f32 = 0.50;
 
-/// Draw `ParseDetailDTO` in the given `Ui`.
-pub fn show_parse_detail(ui: &mut Ui, dto: &ParseDetailDTO) {
+pub fn draw_sink_detail_view(ui: &mut Ui, dto: &ParseDetailDTO) {
     let status_text = helpers::status_as_rich_text(dto.parse_status());
-    let half        = ui.available_width() * HORIZONTAL_PERCENT;
-
+    
     ui.group(|ui| {
-        ui.set_width(half);
-        ui.heading("Parse details");
-
+    ui.push_id("sink_view", |ui| {
+        ui.heading("Sink information");
         TableBuilder::new(ui)
-            .column(Column::auto())
+            .column(Column::auto_with_initial_suggestion(50.0))
             .column(Column::remainder())
             .body(|mut body| {
                 body.row(helpers::ROW_HEIGHT, |mut row| {
-                    row.col(|ui| {ui.label("File name");});
+                    row.col(|ui| {ui.label("Output ...");});
                     row.col(|ui| {helpers::right_label(ui, dto.file_name());});
                 });
-                helpers::row_u64("Bytes parsed",  dto.bytes_parsed(),       &mut body);
                 helpers::row_u32("Duration (ms)", dto.parse_duration_ms(),  &mut body);
+                helpers::row_u64("Anything else", dto.bytes_parsed(),       &mut body);
                 helpers::row_u64("Data rows",     dto.data_rows(),          &mut body);
                 helpers::row_u64("Errors",        dto.errors_encountered(), &mut body);
                 body.row(helpers::ROW_HEIGHT, |mut row| {
@@ -31,5 +28,6 @@ pub fn show_parse_detail(ui: &mut Ui, dto: &ParseDetailDTO) {
                     row.col(|ui| {ui.label(status_text);});
                 });
             });
+    	});
     });
 }

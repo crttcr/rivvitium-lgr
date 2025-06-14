@@ -1,6 +1,7 @@
 
 pub mod dialogs;
 pub mod helpers;
+pub mod layouts;
 pub mod menu;
 pub mod regions;
 pub mod widgets;
@@ -8,7 +9,7 @@ pub mod views;
 pub mod visuals;
 
 use egui::TextureHandle;
-use crate::ui::regions::ActiveAction;
+use crate::ui::regions::ApplicationStatus;
 use std::fmt;
 use crate::ui::dialogs::sink_dialog::SinkDialog;
 
@@ -20,20 +21,20 @@ pub fn standard_button_width() -> f32 { 120.0 }
 /// UI-level state that lives alongside `AppState` / model state.
 //#[derive(Clone, PartialEq)]
 pub struct UiState {
-    active_panel: ActiveAction,
-	pub about_dialog_visible: bool,  ///
-	pub sink_dialog: SinkDialog,  ///
-    about_dialog_texture: Option<TextureHandle>,
+	status:                    ApplicationStatus,
+	pub about_dialog_visible:  bool,  ///
+	pub sink_dialog:           SinkDialog,  ///
+	about_dialog_texture:      Option<TextureHandle>,
 }
 
 impl Default for UiState {
     fn default() -> Self {
-		let active_panel            = ActiveAction::default();
+		let status                  = ApplicationStatus::default();
 		let about_dialog_visible    = false;
 		let about_dialog_texture    = None;
 		let sink_dialog             = SinkDialog::default();
 		Self {
-			active_panel, 
+			status,
 			about_dialog_visible, 
 			sink_dialog, 
 			about_dialog_texture
@@ -44,7 +45,7 @@ impl Default for UiState {
 impl fmt::Debug for UiState {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("UiState")
-            .field("active_panel", &self.active_panel)
+            .field("active_panel", &self.status)
             .field("about_dialog_visible", &self.about_dialog_visible)
             // show `true / false` instead of trying to print the GPU texture
             .field("has_texture", &self.about_dialog_texture.is_some())
@@ -56,13 +57,13 @@ impl UiState {
     /* ───────────── active_panel ───────────── */
 
     #[inline]
-    pub fn active_panel(&self) -> ActiveAction {
-        self.active_panel
+    pub fn current_status(&self) -> ApplicationStatus {
+        self.status
     }
 
     #[inline]
-    pub fn set_active_panel(&mut self, panel: ActiveAction) {
-        self.active_panel = panel;
+    pub fn set_application_status(&mut self, panel: ApplicationStatus) {
+        self.status = panel;
     }
 
     /* ──────── about_dialog_visible ────────── */

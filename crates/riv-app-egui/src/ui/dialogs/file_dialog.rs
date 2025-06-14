@@ -1,7 +1,6 @@
 
-
 use apex::AppState;
-use crate::ui::regions::ActiveAction;
+use crate::ui::regions::ApplicationStatus;
 use crate::ui::UiState;
 
 pub fn choose_file_with_native_dialog(state: &mut AppState, ui: &mut UiState) {
@@ -9,6 +8,10 @@ pub fn choose_file_with_native_dialog(state: &mut AppState, ui: &mut UiState) {
 		.add_filter("Data files", &["csv", "json"])
 		.pick_file() {
 			state.set_source_path(path);
-			ui.set_active_panel(ActiveAction::DataFileOnly);
+			if state.can_parse() {
+				ui.set_application_status(ApplicationStatus::Idle);
+			} else {
+				ui.set_application_status(ApplicationStatus::NotConfigured);
+			}
 		}
 }
