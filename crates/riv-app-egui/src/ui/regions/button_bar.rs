@@ -3,7 +3,6 @@ use crate::ui::visuals::colors::{apply_color_theme, ACCENT, ACCENT_BORDER, TEXT_
 use eframe::epaint::Stroke;
 use egui::{Button, RichText};
 use crate::ui::dialogs::file_dialog::choose_file_with_native_dialog;
-use crate::ui::regions::ApplicationStatus;
 
 /// Draw a horizontal array of buttons and wire behavior
 ///
@@ -38,7 +37,7 @@ fn draw_source_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	}
 }
 
-fn draw_relays_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
+fn draw_relays_button(_app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	let enabled = true;
 	let text    = RichText::new("Relays");
 	let button  = Button::new(text);
@@ -88,7 +87,6 @@ fn draw_analyze_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 
 fn draw_blueprint_button(app: &mut RivvitiumApp, ui: &mut egui::Ui) {
 	let enabled = app.app_state.can_blueprint();
-	let text    = RichText::new("Parse").color(TEXT_ON_ACCENT).strong();
 	let text    = RichText::new("Blueprint").color(TEXT_ON_ACCENT).strong();
 	let stroke  = Stroke::new(1.0, ACCENT_BORDER);
 	let button  = Button::new(text)

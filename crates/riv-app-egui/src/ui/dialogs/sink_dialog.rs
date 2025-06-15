@@ -1,9 +1,9 @@
-//! An egui modal dialog that constructs a `SinkConfig`.
+//! An egui modal dialog that constructs a `SinkSettings` instance.
 
 use egui::{Context, TextEdit, Ui};
 use rfd::FileDialog;
+use riv::component::sink::sink_settings::SinkSettings;
 use riv::component::sink::SinkKind;
-use apex::state::sink_config::SinkConfig;
 
 /* ───────────────────────── dialog state ─────────────────────────── */
 pub struct SinkDialog {
@@ -17,6 +17,10 @@ pub struct SinkDialog {
     server:     String,
     port:       String,
     table:      String,
+    topic:      String,
+    user_name:  String,
+    password:   String,
+    db_name:    String,
 }
 
 impl Default for SinkDialog {
@@ -29,10 +33,14 @@ impl Default for SinkDialog {
             kind,
             file_path,
             delimiter,
-            pretty:    true,
-            server:    "localhost".into(),
-            port:      "9092".into(),       
-            table:     "data".into(),
+            pretty:     true,
+            server:     "localhost".into(),
+            port:       "9092".into(),       
+            table:      "data".into(),
+            topic:      "my_topic".into(),
+            user_name:  "user".into(),
+            password:   "".into(),
+            db_name:    "my_database".into(),       
         }
     }
 }
@@ -42,7 +50,7 @@ impl Default for SinkDialog {
 impl SinkDialog {
     /// Show the dialog if `self.open == true`.
     /// Returns `Some(SinkConfig)` only when the user hits **OK**.
-    pub fn show(&mut self, ctx: &Context) -> Option<SinkConfig> {
+    pub fn show(&mut self, ctx: &Context) -> Option<SinkSettings> {
         let mut result = None;
 
         if self.open {
@@ -66,7 +74,7 @@ impl SinkDialog {
 /* ───────────────────────── rendering ────────────────────────────── */
 
 impl SinkDialog {
-    fn body(&mut self, ui: &mut Ui, out: &mut Option<SinkConfig>) {
+    fn body(&mut self, ui: &mut Ui, out: &mut Option<SinkSettings>) {
         ui.vertical(|ui| {
             /* --- sink kind ------------------------------------------------ */
 
@@ -184,31 +192,45 @@ if matches!(self.kind, SinkKind::Csv) {
             SinkKind::Csv | SinkKind::Json | SinkKind::Sqlite => !self.file_path.trim().is_empty(),
             SinkKind::Kafka => !self.server.trim().is_empty() && self.port.parse::<u16>().is_ok(),           
             SinkKind::Capture | SinkKind::Console | SinkKind::DevNull => true,
-
+            SinkKind::SqlServer => false,
+            _ => false,       
         }
     }
 
-    /* --- helper: build the SinkConfig ----------------------------------- */
-    fn build_config(&self) -> SinkConfig {
+    /* --- helper: build the SinkSettings ----------------------------------- */
+    fn build_config(&self) -> SinkSettings {
         match self.kind {
-            SinkKind::Capture   => SinkConfig::capture(),
-            SinkKind::Console   => SinkConfig::console(),
-            SinkKind::DevNull   => SinkConfig::dev_null(),
+            SinkKind::Capture   => SinkSettings::capture(),
+            SinkKind::Console   => SinkSettings::console(),
+            SinkKind::DevNull   => SinkSettings::dev_null(),
             SinkKind::Csv       => {
 					let delim_char = self.delimiter.chars().next().unwrap_or(',');
-					SinkConfig::csv(self.file_path.clone(), delim_char)            	
+					SinkSettings::csv(self.file_path.clone(), delim_char)            	
             },
-            SinkKind::Json      => SinkConfig::json(
+            SinkKind::Json      => SinkSettings::json(
                 self.file_path.clone(),
                 self.pretty,
             ),
-	        SinkKind::Kafka => SinkConfig::kafka(
+	        SinkKind::Kafka => SinkSettings::kafka(
 	            self.server.clone(),
 	            self.port.parse::<u16>().unwrap_or(9092),
+	            self.topic.clone(),
 	        ),            
-            SinkKind::Sqlite    => SinkConfig::sqlite(
+	        SinkKind::PubSub => SinkSettings::pubsub(
+	            self.server.clone(),
+	            self.port.parse::<u16>().unwrap_or(9092),
+	            self.topic.clone(),
+	        ),              
+	        SinkKind::Sqlite    => SinkSettings::sqlite(
                 self.file_path.clone(),
                 self.table.clone(),
+            ),
+            SinkKind::SqlServer    => SinkSettings::sqlserver(
+                self.server.clone(),
+                self.port.parse::<u16>().unwrap_or(1433),           
+                self.user_name.clone(),
+                self.password.clone(),
+                self.db_name.clone(),           
             ),
         }
     }

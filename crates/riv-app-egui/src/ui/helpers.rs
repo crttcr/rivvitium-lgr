@@ -1,7 +1,7 @@
 
 use eframe::epaint::Color32;
 use egui::RichText;
-use apex::state::parse_detail_dto::ParseStatus;
+use zero::component::telemetry::component_metrics::ComponentStatus;
 
 pub const ROW_HEIGHT: f32 = 20.0;
 
@@ -28,11 +28,11 @@ pub fn row_u32(label: &str, val: u32, body: &mut egui_extras::TableBody) {
     });
 }
 
-pub fn status_as_rich_text(status: ParseStatus) -> RichText {
+pub fn status_as_rich_text(status: ComponentStatus) -> RichText {
 	match status {
-		ParseStatus::NotParsed  => RichText::new("Not parsed" ).color(Color32::GRAY),
-      ParseStatus::InProgress => RichText::new("In progress").color(Color32::DARK_BLUE),
-      ParseStatus::Finished   => RichText::new("Finished"   ).color(Color32::GREEN),
-      ParseStatus::Error      => RichText::new("Error"      ).color(Color32::RED),
+		ComponentStatus::Idle      => RichText::new("Idle"     ).color(Color32::GRAY),
+      ComponentStatus::Active    => RichText::new("Active"   ).color(Color32::GREEN),
+      ComponentStatus::Completed => RichText::new("Completed").color(Color32::DARK_BLUE),
+      ComponentStatus::Failed    => RichText::new("Failed"   ).color(Color32::RED),
 	}
 }

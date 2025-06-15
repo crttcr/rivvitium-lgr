@@ -1,23 +1,7 @@
 use eframe::epaint::Margin;
 use egui::{Color32, Frame, RichText};
 
-/* ---- helper that draws a highlighted banner ------------------------ */
-pub fn caption(ui: &mut egui::Ui, text: &str) {
-    Frame::default()
-        .fill(Color32::from_rgb(240, 240, 255))      // pale background
-        .inner_margin(egui::Margin::symmetric(4, 2))
-        .corner_radius(4.0)
-        .show(ui, |ui| {
-            ui.label(
-                RichText::new(text)
-                    .strong()
-                    .size(14.0)
-                    .color(Color32::DARK_BLUE),
-            );
-        });
 
-    ui.add_space(4.0); // small gap before/after the table
-}
 
 /* helper that draws a blue banner across the entire inner width */
 pub fn caption_banner(ui: &mut egui::Ui, text: &str) {

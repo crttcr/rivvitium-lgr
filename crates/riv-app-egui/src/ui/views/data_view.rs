@@ -1,5 +1,5 @@
 use eframe::epaint::StrokeKind;
-use egui::{Color32, RichText, Sense, Stroke, Vec2, Painter, Rect, Pos2, vec2};
+use egui::{Color32, Sense, Stroke, Painter, Rect, Pos2, vec2};
 
 /// Temporary stand-in for the real data table / chart.
 /// Call with:

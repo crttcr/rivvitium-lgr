@@ -54,13 +54,6 @@ impl fmt::Debug for UiState {
 }
 
 impl UiState {
-    /* ───────────── active_panel ───────────── */
-
-    #[inline]
-    pub fn current_status(&self) -> ApplicationStatus {
-        self.status
-    }
-
     #[inline]
     pub fn set_application_status(&mut self, panel: ApplicationStatus) {
         self.status = panel;

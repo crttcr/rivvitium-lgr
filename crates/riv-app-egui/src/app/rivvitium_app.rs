@@ -1,6 +1,6 @@
 
 use apex::AppState;
-use crate::ui::regions::button_bar::draw_button_bar;
+// use crate::ui::regions::button_bar::draw_button_bar;
 use crate::ui::regions::footer::draw_footer;
 use crate::ui::regions::header::draw_header;
 use crate::ui::{dialogs, UiState};
@@ -10,11 +10,8 @@ use std::sync::mpsc;
 use apex::engines::riv::RivCommand;
 use crate::ui::regions::ApplicationStatus;
 use crate::ui::visuals::colors::ColorTheme;
-use tracing::{error, info, warn};
-use apex::engines::riv::riv_parser::RivParser;
-use apex::state::parse_detail_dto::ParseDetailDTO;
-use riv::model::ir::atom::Atom;
-use zero::telemetry::component::ComponentMetrics;
+use tracing::{info, warn};
+use zero::component::telemetry::component_metrics::ComponentMetrics;
 use crate::ui::layouts::draw_main_screen;
 
 // This is the main application. It both drawing particulars
@@ -57,7 +54,7 @@ impl RivvitiumApp {
 	pub fn fire_blueprint_command(&mut self) {}
 	
 	pub fn fire_publish_command(&mut self) {
-		if !self.app_state.sink_permits_publish() {
+		if !self.app_state.can_publish() {
 			warn!("Application state does have a publishable configuration. Publish command was not sent.");
 			return
 		}
@@ -128,7 +125,7 @@ impl eframe::App for RivvitiumApp {
 			if self.ui_state.is_sink_dialog_visible() {
         		if let Some(cfg) = self.ui_state.sink_dialog.show(ctx) {
             	println!("Sink chosen: {cfg:?}");
-        			self.app_state.set_sink_config(cfg);
+        			self.app_state.set_sink_config(&cfg);
         			self.ui_state.set_sink_dialog_invisible();
 			}
         }
