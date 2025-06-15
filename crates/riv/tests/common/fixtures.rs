@@ -5,6 +5,7 @@ use riv::model::ir::external_metadata::FileMetadata;
 use riv::model::ir::external_metadata::SourceVariant;
 use riv::model::ir::nv_strings::NVStrings;
 use riv::utils::test_file::TestFile;
+use zero::component::identity::id_generator::global_id_gen;
 
 pub struct TestAtoms      {}
 pub struct TestComponents {}
@@ -70,13 +71,14 @@ impl TestComponents {
 		let dst = cfg.build_sink(component_id, tx).unwrap();
 		(cfg, dst)
 	}
-	
-	pub fn capture_config_and_sink(component_id: u32) -> (SinkSettings, Box<dyn riv::component::sink::Sink>) {
+
+	pub fn capture_config_and_sink() -> (SinkSettings, Box<dyn riv::component::sink::Sink>) {
+		let cid = global_id_gen().next_id();
 		let cfg = SinkSettings::capture();
 		let (tx, _)    = std::sync::mpsc::channel();
-		let dst = cfg.build_sink(component_id, tx).unwrap();
+		let dst = cfg.build_sink(cid, tx).unwrap();
 		(cfg, dst)
-	}	
+	}
 }
 
 impl TestFiles {
@@ -84,7 +86,7 @@ impl TestFiles {
 		"../../auxbox/data/weather_stations.10.csv".to_owned()
 	}
 }
-	
+
 #[test]
 fn test_file_exists() {
 	let f = TestFiles::weather_file_10_name_as_string();
@@ -93,18 +95,18 @@ fn test_file_exists() {
 
 #[test]
 fn test_build_the_stupid_component() {
-	let (a, b) = TestComponents::csv_config_and_sink(1, "test.csv");
+	let id     = global_id_gen().next_id();
+	let (a, b) = TestComponents::csv_config_and_sink(id, "test.csv");
 	assert!(a.kind() == SinkKind::Csv);
 	assert!(b.kind() == SinkKind::Csv);
 }
 
 #[test]
 fn test_build_another_stupid_component() {
-	let (a, b) = TestComponents::capture_config_and_sink(1);
+	let (a, b) = TestComponents::capture_config_and_sink();
 	assert!(a.kind() == SinkKind::Capture);
 	assert!(b.kind() == SinkKind::Capture);
 }
-
 
 #[test]
 fn wrap_with_start_end_test() {

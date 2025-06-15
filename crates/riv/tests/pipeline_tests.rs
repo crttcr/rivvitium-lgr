@@ -11,7 +11,7 @@ use crate::common::fixtures::TestComponents;
 pub fn test_capture_of_start_and_end() -> Result<(), Error> {
 	let atoms            = TestAtoms::start_end_vec();             // Create pipeline components
 	let mut  src         = VectorSource::new(atoms);
-	let (t_cfg, mut dst) = TestComponents::capture_config_and_sink(401);
+	let (t_cfg, mut dst) = TestComponents::capture_config_and_sink();
 	let target_msg       = dst.initialize(&t_cfg)?;
 	assert_eq!(target_msg, ());
 	for atom in &mut src {

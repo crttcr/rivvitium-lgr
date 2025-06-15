@@ -12,7 +12,7 @@ use crate::common::fixtures::TestComponents;
 pub fn nv_pipeline_test() -> Result<(), Error> {
 	let atoms            = TestAtoms::nv_pairs();
 	let mut  src         = VectorSource::new(atoms);
-	let (t_cfg, mut dst) = TestComponents::capture_config_and_sink(401);
+	let (t_cfg, mut dst) = TestComponents::capture_config_and_sink();
 	let target_msg       = dst.initialize(&t_cfg)?;
 	assert_eq!(target_msg, ());
 
@@ -24,7 +24,7 @@ pub fn nv_pipeline_test() -> Result<(), Error> {
 	assert!(source_ok);
 
 	dst.close();
-	match dst.kind() {  
+	match dst.kind() {
 		SinkKind::Capture => {
 		},
 		_ => panic!("sink is not CaptureSink"),
