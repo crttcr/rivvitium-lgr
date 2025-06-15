@@ -1,4 +1,14 @@
 use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::OnceLock;
+
+/* ───────────────── global, thread-safe singleton ─────────────── */
+static GLOBAL_ID_GEN: OnceLock<IdGenerator> = OnceLock::new();
+/// Get the global counter, initialising it on first use.
+///
+#[inline]
+pub fn global_id_gen() -> &'static IdGenerator {
+    GLOBAL_ID_GEN.get_or_init(IdGenerator::default)
+}
 
 /// Thread-safe generator that hands out monotonically-increasing `u32`s.
 ///
@@ -39,19 +49,23 @@ impl IdGenerator {
     }
 }
 
- /* -----------------------------------------------------------
-    Testing wrap around.
-    This test is here because it uses private member of the struct.
-	 (tests live in same module, so we may touch the private field)
-	 wrap-around: counter == u32::MAX  → id == 1, then 2
- ----------------------------------------------------------- */
- mod tests {
- use super::*;
-	 #[test]
-	 fn wraps_back_to_one() {
-		  let g = IdGenerator::default();
-		  g.counter.store(u32::MAX, Ordering::Relaxed);   // Force the internal counter to its last value:
-		  assert_eq!(g.next_id(), 1);                     // First call after wrap: returns 1 (and logs a warn!)
-		  assert_eq!(g.next_id(), 2);                     // Second call: 2
-	 }
- }
+/* -----------------------------------------------------------
+	Testing wrap around.
+	This test is here because it uses private member of the struct.
+	(tests live in same module, so we may touch the private field)
+	wrap-around: counter == u32::MAX  → id == 1, then 2
+----------------------------------------------------------- */
+#[cfg(test)]
+mod tests
+{
+use std::sync::atomic::Ordering;
+use super::IdGenerator;
+
+#[test]
+fn wraps_back_to_one() {
+	let g = IdGenerator::default();
+	g.counter.store(u32::MAX, Ordering::Relaxed);   // Force the internal counter to its last value:
+	assert_eq!(g.next_id(), 1);                     // First call after wrap: returns 1 (and logs a warn!)
+	assert_eq!(g.next_id(), 2);                     // Second call: 2
+	}
+}
