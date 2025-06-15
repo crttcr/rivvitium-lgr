@@ -1,5 +1,5 @@
 
-use crate::component::telemetry::component::ComponentMetrics;
+use crate::component::telemetry::component_metrics::ComponentMetrics;
 
 pub trait ProvidesMetrics {
     /// Returns a non-destructive snapshot of the component's current metrics.

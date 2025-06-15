@@ -1,5 +1,5 @@
 use std::time::{Duration, Instant};
-use zero::component::telemetry::component::ComponentMetrics;
+use zero::component::telemetry::component_metrics::ComponentMetrics;
 
 fn main() {
     // --- Individual Component Simulation ---
@@ -21,6 +21,7 @@ fn main() {
     println!("Processing Time     : {:.2?}",             ingest_metrics.duration);
     println!("Data Processed      : {}",                 ingest_metrics.human_readable_bytes());
     println!("Error Rate          : {:.2}%",             ingest_metrics.error_rate().unwrap_or(0.0) * 100.0);
+    println!("Message Rate        : {:.2}%",             ingest_metrics.messages_per_second().unwrap_or(0.0));
     println!("Throughput          : {:.2} records/sec",  ingest_metrics.records_per_second().unwrap_or(0.0));
     println!();
 
@@ -37,6 +38,7 @@ fn main() {
     println!("--- Aggregated Pipeline Metrics ---");
     println!("Combined Status    : {:?}",       total_metrics.status);
     println!("Total Time         : {:.2?}",     total_metrics.duration);
+    println!("Total Messages     : {}",         total_metrics.message_count);
     println!("Total Records      : {}",         total_metrics.record_count);
     println!("Total Data         : {}",         total_metrics.human_readable_bytes());
     println!("Overall Throughput : {:.2} MB/s", total_metrics.throughput_mb_per_sec().unwrap_or(0.0));

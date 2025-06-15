@@ -1,5 +1,5 @@
 use std::time::{Duration, Instant};
-use zero::component::telemetry::component::{ComponentMetrics, ComponentStatus};
+use zero::component::telemetry::component_metrics::{ComponentMetrics, ComponentStatus};
 use zero::component::telemetry::provides_metrics::ProvidesMetrics;
 // Assuming ComponentStatus and ComponentMetrics are defined
 // #[...derive]
@@ -9,14 +9,15 @@ use zero::component::telemetry::provides_metrics::ProvidesMetrics;
 // pub trait ProvidesMetrics { ... }
 
 pub struct FileProcessor {
-    id: u32,
-    source_path: String,
-    status: ComponentStatus,
-    start_time: Option<Instant>,
+    id:           u32,
+    source_path:  String,
+    status:       ComponentStatus,
+    start_time:   Option<Instant>,
 
     // Internal counters updated during operation
-    bytes_processed: u64,
-    lines_read: u64,
+    message_count:      u64,
+    bytes_processed:    u64,
+    lines_read:         u64,
     errors_encountered: u64,
 }
 
@@ -24,11 +25,12 @@ impl FileProcessor {
     pub fn new(id: u32, source_path: &str) -> Self {
         Self {
             id,
-            source_path: source_path.to_string(),
-            status: ComponentStatus::Idle,
-            start_time: None,
-            bytes_processed: 0,
-            lines_read: 0,
+            source_path:        source_path.to_string(),
+            status:             ComponentStatus::Idle,
+            start_time:         None,
+            message_count:      0,
+            bytes_processed:    0,
+            lines_read:         0,
             errors_encountered: 0,
         }
     }
@@ -48,11 +50,12 @@ impl ProvidesMetrics for FileProcessor {
     fn metrics(&self) -> ComponentMetrics {
         ComponentMetrics {
             id: self.id,
-            status: self.status,
-            duration: self.start_time.map_or(Duration::ZERO, |st| st.elapsed()),
-            byte_count: self.bytes_processed,
-            record_count: self.lines_read, // Here, a "record" is a "line"
-            error_count: self.errors_encountered,
+            status:           self.status,
+            duration:         self.start_time.map_or(Duration::ZERO, |st| st.elapsed()),
+            message_count:    self.message_count,
+            byte_count:       self.bytes_processed,
+            record_count:     self.lines_read, // Here, a "record" is a "line"
+            error_count:      self.errors_encountered,
         }
     }
     fn take_metrics(&mut self) -> ComponentMetrics {
