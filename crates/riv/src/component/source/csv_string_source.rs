@@ -1,5 +1,5 @@
 use crate::component::source::csv_adapter::CsvState;
-use crate::component::source::{Source, SourceConfig, SourceState};
+use crate::component::source::{Source, SourceConfig, SourceState, SourceType};
 use crate::model::ir::atom::Atom;
 use crate::Error;
 use std::fmt::{Debug, Display};
@@ -39,6 +39,8 @@ impl CsvStringSource {
 }
 
 impl Source for CsvStringSource {
+	fn source_type(&self) -> SourceType { SourceType::Csv }
+	
 	// fn from_config(cfg: &dyn SourceConfig) -> Result<Box<Self>, Error> {
 	// 	if let(Some(file_path)) = cfg.path_buf() {
 	// 		let file_path_string = file_path.clone().into_os_string().into_string();

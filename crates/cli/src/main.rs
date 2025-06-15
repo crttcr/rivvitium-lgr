@@ -2,11 +2,10 @@ use anyhow::Result;
 use riv::component::relay::console_relay::ConsoleRelay;
 use riv::component::relay::empty_relay_config::EmptyRelayConfig;
 use riv::component::relay::Relay;
-use riv::component::sink::capture_sink::CaptureSink;
-use riv::component::sink::empty_sink_config::EmptySinkConfig;
-use riv::component::sink::Sink;
+use riv::component::sink::sink_settings::SinkSettings;
 use riv::error::Error;
 use riv::model::ir::atom::Atom;
+use zero::component::identity::id_generator::global_id_gen;
 
 fn main() {
 	let hello = String::from("Hello. Running [tbd]");
@@ -20,11 +19,13 @@ fn main() {
 
 fn run() -> Result<(), Error> {
 	let mut relay = ConsoleRelay::new();
-	let mut sink = CaptureSink::new();
+	let sink_cfg  = SinkSettings::capture();
+	let comp_id   = global_id_gen().next_id();
+	let (tx, _)   = std::sync::mpsc::channel();
+	let mut sink  = sink_cfg.build_sink(comp_id, tx)?;
 	let relay_cfg = EmptyRelayConfig::default();
-	let target_cfg = EmptySinkConfig::default();
 	relay.initialize(&relay_cfg)?;
-	sink.initialize(&target_cfg)?;
+	sink.initialize(&sink_cfg)?;
 
 	// Assume you have some Atoms
 	let atoms = vec![];
@@ -38,7 +39,7 @@ fn run() -> Result<(), Error> {
 	let relay_ok = relay.finish();
 	if relay_ok {
 		sink.close();
-		let collected: Vec<Atom> = sink.into_atoms();
+		let collected: Vec<Atom> = sink.drain_atoms();
 		let count = collected.len();
 		println!("Processed {count} atoms");
 		Ok(())

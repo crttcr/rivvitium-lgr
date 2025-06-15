@@ -34,6 +34,29 @@ impl ComponentMetrics {
 			error_count:    0,
 		}
 	}
+	
+	pub fn sample_active(id: u32) -> Self {
+		ComponentMetrics{
+			id, 
+			status:         ComponentStatus::Active,
+			duration:       Duration::from_secs(23),
+			message_count:  2045,
+			byte_count:     4994932, 
+			record_count:   1339,
+			error_count:    0,
+		}
+	}
+	pub fn sample_idle(id: u32) -> Self {
+		ComponentMetrics{
+			id, 
+			status:         ComponentStatus::Idle,
+			duration:       Duration::from_millis(4929),
+			message_count:  4,
+			byte_count:     7102, 
+			record_count:   1,
+			error_count:    1,
+		}
+	}
 }
 	
 // State management

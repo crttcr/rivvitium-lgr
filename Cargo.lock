@@ -7486,6 +7486,9 @@ dependencies = [
 [[package]]
 name = "zero"
 version = "0.1.0"
+dependencies = [
+ "tracing",
+]
 
 [[package]]
 name = "zerocopy"

@@ -1,5 +1,5 @@
 use crate::component::source::csv_adapter::CsvState;
-use crate::component::source::{Source, SourceConfig, SourceState};
+use crate::component::source::{Source, SourceConfig, SourceState, SourceType};
 use crate::model::ir::atom::Atom;
 use crate::Error;
 use csv_core;
@@ -121,6 +121,7 @@ impl<R: Read> CsvByteSource<R> {
 }
 
 impl<R: Read> Source for CsvByteSource<R> {
+	fn source_type(&self) -> SourceType { SourceType::Csv }
 
 	// fn from_config(cfg: &dyn SourceConfig) -> Result<Box<Self>, Error> {
 	// 	if let(Some(file_path)) = cfg.path_buf() {

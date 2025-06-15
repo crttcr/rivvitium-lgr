@@ -60,7 +60,7 @@ pub enum SinkSettings {
         table:   String,
     },
     
-    /// Persists to SQLite table.
+    /// Persists to Sql Server database.
     SqlServer {
         server:    String,
         port:      u16,
@@ -113,15 +113,31 @@ impl SinkSettings {
         }
     }
 
-    pub fn sqlserver<P: Into<PathBuf>>(path: P, table: impl Into<String>) -> Self {
-        Self::Sqlite {
-            db_path: path.into(),
-            table:   table.into(),
+    pub fn sqlserver(
+    	server:      impl Into<String>,
+    	port:        u16,
+    	user_name:   impl Into<String>,
+    	password:    impl Into<String>,
+    	db_name:     impl Into<String>,
+    	) -> Self {
+        Self::SqlServer {
+            server:     server.into(),
+            port:       port,
+            user_name:  user_name.into(),
+            password:   password.into(),
+            db_name:    db_name.into(),       
         }
     }
 }
 
 /* ---------------------------------------------------------------
+
+        server:    String,
+        port:      u16,
+        user_name: String,
+        password:  String,
+        db_name:   String,
+    },
    Build a boxed sink **from config + sender**
 ---------------------------------------------------------------- */
 impl SinkSettings {
@@ -201,6 +217,20 @@ impl SinkSettings {
             Self::PubSub    { .. }  => SinkKind::Kafka,
             Self::Sqlite    { .. }  => SinkKind::Sqlite,
             Self::SqlServer { .. }  => SinkKind::Kafka,
+        }
+    }
+
+    /// Handy accessor when you only need to know the *kind*.
+    pub fn can_publish(&self) -> bool {
+        match self {
+            Self::Capture           => false,
+            Self::Console           => false,
+            Self::DevNull           => false,
+            Self::Json      { .. }  => false,     // false until implemented
+            Self::Kafka     { .. }  => false,     // false until implemented
+            Self::PubSub    { .. }  => false,     // false until implemented
+            Self::SqlServer { .. }  => false,     // false until implemented
+            _                       => true,       
         }
     }
 

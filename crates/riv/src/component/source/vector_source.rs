@@ -5,7 +5,7 @@ use tracing::info;
 use crate::model::ir::atom::Atom;
 use crate::error::Error;
 use crate::model::ir::atom::Atom::ErrorAtom;
-use crate::component::source::{Source, SourceConfig, SourceState};
+use crate::component::source::{Source, SourceConfig, SourceState, SourceType};
 
 /// A `Source` that yields atoms from an in-memory Vec.
 pub struct VectorSource {
@@ -15,6 +15,7 @@ pub struct VectorSource {
 }
 
 impl VectorSource {
+	
 	/// Create a new VectorSource with the given atoms.
 	pub fn new(atoms: Vec<Atom>) -> Self {
 		let msg             = format!("[VectorSource]: created. Item count: {}", atoms.len());
@@ -52,6 +53,7 @@ impl Iterator for VectorSource {
 }
 
 impl Source for VectorSource {
+	fn source_type(&self) -> SourceType { SourceType::StaticData }
 
 	// fn from_config(_cfg: &dyn SourceConfig) -> Result<Box<Self>, Error> {
 	// 	Err(Error::InvalidConfig("[VectorSource]: do not use config to create this source. Call VectorSource::new(atoms) directly".to_owned()))
