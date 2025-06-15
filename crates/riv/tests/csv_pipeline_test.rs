@@ -8,7 +8,6 @@ use tracing_subscriber::{fmt, EnvFilter};
 use tracing_subscriber::fmt::format::FmtSpan;
 use riv::component::relay::empty_relay_config::EmptyRelayConfig;
 use riv::component::sink::csv_sink::CsvSink;
-use riv::component::sink::empty_sink_config::EmptySinkConfig;
 
 #[test]
 pub fn test_csv_pipeline() -> Result<(), Error> {

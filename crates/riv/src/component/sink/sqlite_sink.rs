@@ -1,10 +1,16 @@
 use std::{fmt::Debug, path::Path};
 use std::fmt::Display;
+use std::path::PathBuf;
+use std::sync::mpsc::Sender;
+use std::time::Instant;
 use rusqlite::{params_from_iter, Connection, Error as RusqliteError};
 use crate::error::{Error, IoErrorWrapper};
 use tracing::{error, info, instrument, warn};
 use tracing_subscriber::fmt::format;
-use crate::component::sink::{Sink, SinkConfig, SinkKind};
+use zero::component::telemetry::component_metrics::ComponentMetrics;
+use zero::component::telemetry::provides_metrics::ProvidesMetrics;
+use crate::component::sink::{Sink, SinkKind};
+use crate::component::sink::sink_settings::SinkSettings;
 use crate::model::ir::atom::Atom;
 use crate::model::ir::atom_type::AtomType;
 
@@ -13,23 +19,37 @@ use crate::model::ir::atom_type::AtomType;
 /// It expects to see a `HeaderRowAtom` first, which defines column names.  
 /// Subsequent row atoms (`ByteRowAtom` or `StringRowAtom`) are inserted into the table.
 pub struct SqliteSink {
+	component_id:     u32,
     /// Filesystem path to the SQLite database file
-    db_path: String,
-    /// The open SQLite connection (populated in `initialize`)
-    cx: Option<Connection>,
+	file_path:        PathBuf,
     /// Table name to use (fixed as "records")
     table: String,
+
+    /// The open SQLite connection (populated in `initialize`)
+    cx: Option<Connection>,
     /// Column names, populated when a `HeaderRowAtom` is accepted
     columns: Vec<String>,
+	created_utc:      Instant,
+	started_utc:      Instant,
+	metrics:          ComponentMetrics,
+	tx:               Sender<ComponentMetrics>
 }
 
 impl SqliteSink {
-    pub fn new(db_path: String) -> Self {
+    pub fn new(component_id: u32, file_path: PathBuf, table: String, tx: Sender<ComponentMetrics>) -> Self {
+		let created_utc = Instant::now();
+		let started_utc = created_utc;
+		let metrics     = ComponentMetrics::new(component_id);
         SqliteSink {
-            db_path,
+				component_id,
+            file_path,
+            table,
             cx: None,
-            table: "records".to_string(),
             columns: Vec::new(),
+            tx,
+            created_utc,
+            started_utc,
+            metrics,
         }
     }
 }
@@ -38,10 +58,10 @@ impl Sink for SqliteSink {
 	fn kind(&self) -> SinkKind { SinkKind::Sqlite }
 
 //    #[instrument]
-	fn initialize(&mut self, cfg: &dyn SinkConfig) -> Result<(), Error> {
+	fn initialize(&mut self, _cfg: &SinkSettings) -> Result<(), Error> {
 		
         // 1) Open (or create) the SQLite database file
-        let cx = Connection::open(&self.db_path).map_err(|e| {Error::from(e)})?;
+        let cx = Connection::open(&self.file_path).map_err(|e| {Error::from(e)})?;
            // .map_err(|e| Error::Io { source: IoErrorWrapper::from(e.into()) })?;
         // Turn on foreign keys, etc., if desired
         cx.execute_batch("PRAGMA foreign_keys = ON;")
@@ -165,7 +185,6 @@ impl Sink for SqliteSink {
         Ok(())
     }
 
-    #[instrument(skip(self), fields(self = "SqliteSink", db_path=%self.db_path))]
     fn close(&mut self) {
         // 7) Finalize by closing the connection (drop it)
         if let Some(cx) = self.cx.take() {
@@ -177,4 +196,15 @@ impl Sink for SqliteSink {
 				warn!("Close called but no active SqlLite connection");
         }
     }
+}
+
+impl ProvidesMetrics for SqliteSink {
+    fn metrics(&self) -> ComponentMetrics {
+    	self.metrics.clone()
+    }
+	fn take_metrics(&mut self) -> ComponentMetrics {
+		let rv = self.metrics.clone();
+		self.metrics.reset();
+		rv
+	}
 }

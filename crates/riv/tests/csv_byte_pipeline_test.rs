@@ -9,7 +9,7 @@ use tracing_subscriber::{fmt, EnvFilter};
 use tracing_subscriber::fmt::format::FmtSpan;
 use riv::component::relay::empty_relay_config::EmptyRelayConfig;
 use riv::component::sink::csv_sink::CsvSink;
-use riv::component::sink::empty_sink_config::EmptySinkConfig;
+use riv::component::sink::sink_settings::SinkSettings;
 use riv::component::source::csv_byte_source::CsvByteSource;
 
 
@@ -27,12 +27,12 @@ pub fn run_csv_byte_pipeline() -> Result<(), Error> {
 	let file      =  File::open(file_path).expect("File open failed");
 	let mut src   = CsvByteSource::new(file);
 	let mut relay = ConsoleRelay::new();
-	let mut dst   = CsvSink::new("csv_byte_output.csv".to_string());
+	let target_cfg = SinkSettings::csv("test.output.csv", ';');
+	let mut dst    = make_csv_sink(&target_cfg);
 
 	tracing::info!("Initializing pipeline components");
 	let relay_cfg       = EmptyRelayConfig::default();
 	let relay_msg       = relay.initialize(&relay_cfg)?;
-	let target_cfg      = EmptySinkConfig::default();
 	let target_msg      = dst.initialize(&target_cfg)?;
 
 	assert_eq!(relay_msg,  ());
@@ -53,4 +53,11 @@ pub fn run_csv_byte_pipeline() -> Result<(), Error> {
 	assert!(source_ok);
 	assert!(relay_ok);
 	Ok(())
+}
+
+fn make_csv_sink(cfg: &SinkSettings) -> impl Sink {
+	let component_id = 201;
+	let (tx, rx)     = std::sync::mpsc::channel();
+	let sink         = cfg.build_sink(component_id, tx);
+	sink
 }

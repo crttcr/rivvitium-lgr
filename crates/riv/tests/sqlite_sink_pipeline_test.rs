@@ -9,7 +9,6 @@ use riv::component::sink::sqlite_sink::SqliteSink;
 use riv::component::source::csv_byte_source::CsvByteSource;
 use std::fs::File;
 use riv::component::relay::empty_relay_config::EmptyRelayConfig;
-use riv::component::sink::empty_sink_config::EmptySinkConfig;
 
 #[test]
 pub fn run_sqlite_pipeline() -> Result<(), Error> {

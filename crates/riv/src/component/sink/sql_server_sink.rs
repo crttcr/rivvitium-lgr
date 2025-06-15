@@ -14,72 +14,66 @@ use zero::component::telemetry::provides_metrics::ProvidesMetrics;
 use crate::component::sink::sink_settings::SinkSettings;
 
 #[derive(Debug)]
-pub struct CaptureSink {
+pub struct SqlServerSink {
 	component_id: u32,
+	server:       String,
+	port:         u16,
+	user_name:    String,
+	password:     String,
+	db_name:      String,
 	created_utc:  Instant,
 	started_utc:  Instant,
-	atoms:        Vec<Atom>,
 	metrics:      ComponentMetrics,
 	tx:           Sender<ComponentMetrics>
 }
 
-impl CaptureSink {
-	pub fn new(component_id: u32, tx: Sender<ComponentMetrics>) -> Self {
-		let atoms       = Vec::new();
+impl SqlServerSink {
+	pub fn new(component_id: u32, server: String, port: u16,
+		user_name: String, password: String, db_name: String,
+		tx: Sender<ComponentMetrics>
+		) -> Self {
 		let created_utc = Instant::now();
 		let started_utc = created_utc;
 		let metrics     = ComponentMetrics::new(component_id);
-		Self {component_id, created_utc, started_utc, atoms, metrics, tx}
-	}
-
-	pub fn new_with_atoms(component_id: u32, atoms: Vec<Atom>, tx: Sender<ComponentMetrics>) -> Self {
-		let created_utc = Instant::now();
-		let started_utc = created_utc;
-		let metrics     = ComponentMetrics::new(component_id);
-		Self {component_id, created_utc, started_utc, atoms, metrics, tx}
+		Self {
+			component_id,
+			server,
+			port,
+			user_name,
+			password,
+			db_name,
+			created_utc, started_utc, metrics, tx}
 	}
 
 	pub fn start(&mut self) {
 		self.started_utc = Instant::now();
 		self.metrics.activate();
 	}
-	
+
 	pub fn close(&mut self) {
 		self.metrics.complete();
 	}
-	
-	pub fn into_atoms(self) -> Vec<Atom> {
-		self.atoms
-	}
 }
 
-impl Sink for CaptureSink {
+impl Sink for SqlServerSink {
 	fn kind(&self) -> SinkKind { SinkKind::Capture }
-        
+
 	#[instrument]
 	fn initialize(&mut self, _cfg: &SinkSettings) -> Result<(), Error> {
-		self.atoms.clear();
 		self.metrics.reset();
 		Ok(())
 	}
 
-	fn accept(&mut self, atom: Atom) -> Result<(), Error> {
+	fn accept(&mut self, _atom: Atom) -> Result<(), Error> {
 		self.metrics.increment_messages();
-		if self.metrics.status == ComponentStatus::Completed {
-			let msg = "CaptureSink: Completed. No new atoms";
-			warn!(msg);
-			Err(Error::InvalidInput(msg.into()))
-		} else {
-			self.atoms.push(atom);
-			Ok(())
-		}
+		Ok(())
 	}
 
 	#[instrument]
 	fn close(&mut self) {}
 }
 
-impl ProvidesMetrics for CaptureSink {
+impl ProvidesMetrics for SqlServerSink {
     fn metrics(&self) -> ComponentMetrics {
     	self.metrics.clone()
     }

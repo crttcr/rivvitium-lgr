@@ -1,64 +1,69 @@
+
+use crate::model::ir::atom::Atom;
+use crate::error::Error;
+use crate::component::sink::{Sink, SinkKind};
+
 use std::fmt::{Debug, Display};
+use std::path::PathBuf;
 use std::sync::mpsc::Sender;
 use std::time::Instant;
-use tracing::{info, instrument};
-use zero::component::telemetry::component_metrics::ComponentMetrics;
+use rusqlite::Connection;
+use tracing::{info, instrument, warn};
+use zero::component::telemetry::component_metrics::{ComponentMetrics, ComponentStatus};
 use zero::component::telemetry::provides_metrics::ProvidesMetrics;
-use crate::component::sink::{Sink, SinkKind};
-use crate::component::sink::capture_sink::CaptureSink;
 use crate::component::sink::sink_settings::SinkSettings;
-use crate::error::Error;
-use crate::model::ir::atom::Atom;
+//
+// FIXME: This has not been implemented
+//
 
-pub struct ConsoleSink {
+#[derive(Debug)]
+pub struct JsonSink {
 	component_id: u32,
+	file_path:    PathBuf,
+	pretty:       bool,
 	created_utc:  Instant,
 	started_utc:  Instant,
 	metrics:      ComponentMetrics,
 	tx:           Sender<ComponentMetrics>
 }
 
-impl ConsoleSink {
-	pub fn new(component_id: u32, tx: Sender<ComponentMetrics>) -> Self {
+impl JsonSink {
+	pub fn new(component_id: u32, file_path: PathBuf, pretty: bool, tx: Sender<ComponentMetrics>) -> Self {
 		let created_utc = Instant::now();
 		let started_utc = created_utc;
 		let metrics     = ComponentMetrics::new(component_id);
-		Self {component_id, created_utc, started_utc, metrics, tx}
+		Self {component_id, file_path, pretty, created_utc, started_utc, metrics, tx}
 	}
-	
+
 	pub fn start(&mut self) {
 		self.started_utc = Instant::now();
 		self.metrics.activate();
 	}
-	
+
 	pub fn close(&mut self) {
 		self.metrics.complete();
 	}
 }
 
-impl Sink for ConsoleSink
-{
-	fn kind(&self) -> SinkKind { SinkKind::Console }
-	
-	#[instrument(level = "debug", skip_all)]
-	fn initialize(&mut self, cfg: &SinkSettings) -> Result<(), Error> {
-		let msg = format!("[ConsoleSink ]: Initializing {:?}. TODO: Actually use configuration", cfg);
-		println!("{msg}");
+impl Sink for JsonSink {
+	fn kind(&self) -> SinkKind { SinkKind::Capture }
+
+	#[instrument]
+	fn initialize(&mut self, _cfg: &SinkSettings) -> Result<(), Error> {
 		self.metrics.reset();
 		Ok(())
 	}
 
-	fn accept(&mut self, atom: Atom) -> Result<(), Error> {
-		println!("{atom:?}");
+	fn accept(&mut self, _atom: Atom) -> Result<(), Error> {
 		self.metrics.increment_messages();
 		Ok(())
 	}
 
-	#[instrument(level = "debug", skip_all)]
+	#[instrument]
 	fn close(&mut self) {}
 }
 
-impl ProvidesMetrics for ConsoleSink {
+impl ProvidesMetrics for JsonSink {
     fn metrics(&self) -> ComponentMetrics {
     	self.metrics.clone()
     }

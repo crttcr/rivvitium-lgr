@@ -3,7 +3,6 @@ mod common;
 
 use common::fixtures::TestAtoms;
 use riv::component::sink::capture_sink::CaptureSink;
-use riv::component::sink::empty_sink_config::EmptySinkConfig;
 use riv::component::sink::Sink;
 use riv::component::source::vector_source::VectorSource;
 use riv::component::source::Source;
