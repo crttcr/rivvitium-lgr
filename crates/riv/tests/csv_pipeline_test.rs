@@ -1,13 +1,15 @@
+mod common;
+
 use riv::component::relay::console_relay::ConsoleRelay;
 use riv::component::relay::Relay;
-use riv::component::sink::Sink;
 use riv::component::source::csv_string_source::CsvStringSource;
 use riv::component::source::Source;
 use riv::Error;
 use tracing_subscriber::{fmt, EnvFilter};
 use tracing_subscriber::fmt::format::FmtSpan;
 use riv::component::relay::empty_relay_config::EmptyRelayConfig;
-use riv::component::sink::csv_sink::CsvSink;
+use common::fixtures::TestComponents;
+use common::fixtures::TestFiles;
 
 #[test]
 pub fn test_csv_pipeline() -> Result<(), Error> {
@@ -19,14 +21,12 @@ pub fn test_csv_pipeline() -> Result<(), Error> {
 		.init();
 
 	tracing::info!("Creating pipeline components");
-	let file_name = "../auxbox/data/weather_stations.10.csv".to_owned();
-	let mut src   = CsvStringSource::new(file_name);
-	let mut relay = ConsoleRelay::new();
-	let mut dst   = CsvSink::new("csv_string_output.csv".to_string());
+	let file_name  = TestFiles::weather_file_10_name_as_string();
+	let mut src    = CsvStringSource::new(file_name);
+	let mut relay  = ConsoleRelay::new();
+	let (target_cfg, mut dst) = TestComponents::csv_config_and_sink(401, "/tmp/test_csv_pipeline.csv");
 
 	tracing::info!("Initializing pipeline components");
-	let cfg             = "TODO: Use configuration".to_owned();
-	let target_cfg      = EmptySinkConfig::default();
 	let target_msg      = dst.initialize(&target_cfg)?;
 	let relay_cfg       = EmptyRelayConfig::default();
 	let relay_msg       = relay.initialize(&relay_cfg)?;
@@ -45,7 +45,7 @@ pub fn test_csv_pipeline() -> Result<(), Error> {
 	tracing::info!("Finishing components");
 	let source_ok = src.close()?;
 	let relay_ok  = relay.finish();
-	let count     = dst.close();
+	dst.close();
 	assert!(source_ok);
 	assert!(relay_ok);
 	Ok(())

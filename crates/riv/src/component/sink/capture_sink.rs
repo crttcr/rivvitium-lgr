@@ -5,6 +5,7 @@ use crate::error::Error;
 use crate::component::sink::{Sink, SinkKind};
 
 use std::fmt::{Debug, Display};
+use std::mem;
 use std::sync::mpsc::Sender;
 use std::time::Instant;
 use rusqlite::Connection;
@@ -49,6 +50,7 @@ impl CaptureSink {
 	}
 	
 	pub fn into_atoms(self) -> Vec<Atom> {
+		println!("CaptureSink::into_atoms");
 		self.atoms
 	}
 }
@@ -64,6 +66,7 @@ impl Sink for CaptureSink {
 	}
 
 	fn accept(&mut self, atom: Atom) -> Result<(), Error> {
+		println!("CaptureSink::accept: {:?}", atom);
 		self.metrics.increment_messages();
 		if self.metrics.status == ComponentStatus::Completed {
 			let msg = "CaptureSink: Completed. No new atoms";
@@ -74,6 +77,10 @@ impl Sink for CaptureSink {
 			Ok(())
 		}
 	}
+	
+	fn drain_atoms(&mut self) -> Vec<Atom> {
+		mem::take(&mut self.atoms)
+   }
 
 	#[instrument]
 	fn close(&mut self) {}

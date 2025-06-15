@@ -1,14 +1,13 @@
 use riv::component::relay::console_relay::ConsoleRelay;
 use riv::component::relay::Relay;
-use riv::component::sink::Sink;
 use riv::component::source::Source;
 use riv::{data_file_path_as_str, Error};
 use tracing_subscriber::{fmt, EnvFilter};
 use tracing_subscriber::fmt::format::FmtSpan;
-use riv::component::sink::sqlite_sink::SqliteSink;
 use riv::component::source::csv_byte_source::CsvByteSource;
 use std::fs::File;
 use riv::component::relay::empty_relay_config::EmptyRelayConfig;
+use riv::component::sink::sink_settings::SinkSettings;
 
 #[test]
 pub fn run_sqlite_pipeline() -> Result<(), Error> {
@@ -22,16 +21,18 @@ pub fn run_sqlite_pipeline() -> Result<(), Error> {
 	tracing::info!("Creating pipeline components");
 	
 	let input_file  = data_file_path_as_str("weather_stations.10.csv");
-	let output_file = "/tmp/weather_stations.10.db".to_owned();
 	let input_file  = File::open(input_file).expect("File open failed");
 	let mut src     = CsvByteSource::new(input_file);
 	let mut relay   = ConsoleRelay::new();
-	let mut dst     = SqliteSink::new(output_file);
 
+	let cid        = 401;
+	let target_cfg = SinkSettings::csv("/tmp/bar.csv", ';');
+	let (tx, _)    = std::sync::mpsc::channel();
+	let mut  dst   = target_cfg.build_sink(cid, tx)?;
+	
 	tracing::info!("Initializing pipeline components");
 	let relay_cfg   = EmptyRelayConfig::default();
 	let relay_msg   = relay.initialize(&relay_cfg)?;
-	let target_cfg  = EmptySinkConfig::default();
 	let target_msg  = dst.initialize(&target_cfg)?;
 
 

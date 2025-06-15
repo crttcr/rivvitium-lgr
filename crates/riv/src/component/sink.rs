@@ -39,6 +39,8 @@ impl SinkKind {
 /// Display is especially handy for UI lists, logging, or CLI flags:
 ///
 /// ```rust
+/// use riv::component::sink::SinkKind;
+/// let kind = SinkKind::Capture;
 /// println!("Selected sink: {kind}");
 /// // → “CSV file”
 /// ```
@@ -65,4 +67,7 @@ pub trait Sink
 	fn initialize(&mut self, cfg: &SinkSettings) -> Result<(), Error>;
 	fn accept(&mut self, atom: Atom)             -> Result<(), Error>;
 	fn close(&mut self);
+	fn drain_atoms(& mut self)                   -> Vec<Atom> { 
+		Vec::new() 
+	}
 }

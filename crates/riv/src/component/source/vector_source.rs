@@ -1,4 +1,5 @@
 
+use std::collections::VecDeque;
 use std::fmt::Display;
 use tracing::info;
 use crate::model::ir::atom::Atom;
@@ -8,7 +9,7 @@ use crate::component::source::{Source, SourceConfig, SourceState};
 
 /// A `Source` that yields atoms from an in-memory Vec.
 pub struct VectorSource {
-	atoms:           Vec<Atom>,
+	atoms:           VecDeque<Atom>,
 	state:           SourceState<()>,
 	error_atom_sent: bool,
 }
@@ -20,7 +21,7 @@ impl VectorSource {
 		let state           = SourceState::Ready(());
 		let error_atom_sent = false;
 		info!("{msg}");
-		Self {atoms, state, error_atom_sent}
+		Self {atoms: atoms.into(), state, error_atom_sent}
 	}
 }
 
@@ -31,7 +32,7 @@ impl Iterator for VectorSource {
 		match &mut self.state {
 			SourceState::Completed     => None,
 			SourceState::Ready(_)      => {
-				let rv = self.atoms.pop();
+				let rv = self.atoms.pop_front();
 				if rv.is_none() {
 					self.state = SourceState::Completed
 				}
