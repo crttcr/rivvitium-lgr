@@ -1,27 +1,6 @@
 
 use crate::state::app_state::AppState;
 
-use std::{fs::File, io::Write, path::PathBuf};
-
-// ---------- helpers ----------------------------------------------------
-
- /// Create a small, definitely-readable temp file and give back its `PathBuf`.
- fn make_temp_file() -> PathBuf {
-	  let mut path = std::env::temp_dir();
-	  path.push("source_state_test.tmp");
-	  // If the file happens to exist from a previous run, truncate it:
-	  let mut f = File::create(&path).expect("create temp file");
-	  writeln!(f, "dummy").unwrap();
-	  path
- }
-
- /// Path that (almost certainly) does *not* exist.
- fn bogus_path() -> PathBuf {
-	  let mut path = std::env::temp_dir();
-	  path.push("obviously__does__not__exist.xyz");
-	  path
- }
-
  // ---------- tests -------------------------------------------------------
 
  #[test]

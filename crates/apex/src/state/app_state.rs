@@ -2,33 +2,25 @@
 use tracing::{info, instrument, warn};
 use zero::util::file_utils::assert_readable;
 use std::path::PathBuf;
-use std::sync::mpsc;
-use std::sync::mpsc::{Receiver, Sender};
-use riv::component::sink::SinkKind;
+use std::sync::mpsc::Sender;
+use riv::component::sink::sink_settings::SinkSettings;
 use riv::component::source::path_buf_config::PathBufConfig;
-use riv::component::source::SourceConfig;
 use riv::Error;
-use zero::telemetry::component::ComponentMetrics;
+use zero::component::telemetry::component_metrics::ComponentMetrics;
 use crate::engines::riv::engine::Engine;
 use crate::engines::riv::parse_helper::open_source;
-use crate::engines::riv::config::Config;
-use crate::state::parse_detail_dto::ParseDetailDTO;
-use crate::state::sink_config::SinkConfig;
+use crate::engines::riv::component_configuration::ComponentConfiguration;
 
 pub struct AppState {
 	metric_tx:      Sender<ComponentMetrics>,
-	parse_detail:   Option<ParseDetailDTO>,
-	sink_config:    SinkConfig,
-	config:         Config,
+	config:         ComponentConfiguration,
 	engine:         Option<Engine>,
 }
 
 impl AppState {
 	pub fn new(metric_tx: Sender<ComponentMetrics>) -> Self {
-		let parse_detail     = None;
-		let sink_config      = SinkConfig::default();
-		let pipeline_builder = Config::default();
-		Self{metric_tx, parse_detail, sink_config, config:pipeline_builder, engine: None}
+		let pipeline_builder = ComponentConfiguration::default();
+		Self{metric_tx, config:pipeline_builder, engine: None}
 	}
 }
 
@@ -41,7 +33,7 @@ impl AppState {
 			let error = Error::General("Must have a valid input to start parse.".to_string());
 			return Err(error);
 		}
-		match self.config.build() {
+		match self.config.build(self.metric_tx.clone()) {
 			Ok(engine) => {
 			self.engine = Some(engine);
 				Ok(0)
@@ -61,10 +53,10 @@ impl AppState {
 			Ok(_)  => {
 				info!("Updating source: {}", selected_file.display());
 				match open_source(&selected_file) {
-					Ok(src)  => {
+					Ok(_)  => {
 						let config = PathBufConfig::new(selected_file);
 						let config = Box::new(config);
-						self.config.source(config);
+						self.config.set_source_configuration(config);
 					}
 					Err(e) => {
 						warn!("⚠ Bad file. Not updating source: {}: {}", selected_file.display(), e);
@@ -76,37 +68,21 @@ impl AppState {
 			}
 		 }
 	}
-	
-	pub fn with_dto(&mut self, dto: ParseDetailDTO) -> () {
-		self.parse_detail.replace(dto);
+
+	pub fn set_sink_config(&mut self, cfg: &SinkSettings) -> () {
+		self.config.set_sink_configuration(cfg)
 	}
 
-	pub fn set_sink_config(&mut self, cfg: SinkConfig) -> () {
-		self.sink_config = cfg;
+	pub fn get_sink_config(&self) -> SinkSettings {
+		self.config.get_sink_configuration()
 	}
 
-	pub fn get_sink_config(&self) -> SinkConfig {
-		self.sink_config.clone()
-	}
-
-	pub fn get_sink_config_mut(&mut self) -> &mut SinkConfig {
-		&mut self.sink_config
-	}
-
-	pub fn get_parse_detail_mut(&mut self) -> &mut Option<ParseDetailDTO> {
-		&mut self.parse_detail
-	}
-	pub fn get_parse_detail(&self) -> Option<&ParseDetailDTO> {
-		self.parse_detail.as_ref()
-	}
-	
-	
 	#[instrument(skip(self))]	
 	pub fn teardown(&mut self) {
 	}
 	
 	pub fn close_source_file(&mut self) {
-		&self.config.source_reset();
+		self.config.source_reset();
 	}
 
 	pub fn clear_relays(&mut self) {
@@ -120,16 +96,7 @@ impl AppState {
 	pub fn can_blueprint(&self)            -> bool { false }
 	pub fn can_publish(&self)              -> bool { self.config.can_publish() }
 
-	pub fn has_selected_relays(&self)      -> bool { false                        }
-	pub fn sink_permits_publish(&self)     -> bool {
-		match self.sink_config.kind() {
-			SinkKind::Csv    => true,
-			SinkKind::Json   => true,
-			SinkKind::Kafka  => true,
-			SinkKind::Sqlite => true,
-			_ => false,
-		}
-	}
+	pub fn has_selected_relays(&self)      -> bool { false                     }
 }
 
 /*

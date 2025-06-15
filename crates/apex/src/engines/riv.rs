@@ -1,8 +1,7 @@
 
 pub mod engine;
 pub mod parse_helper;
-pub mod config;
-pub mod riv_parser;
+pub mod component_configuration;
 
 #[cfg(test)]
 mod config_tests;
